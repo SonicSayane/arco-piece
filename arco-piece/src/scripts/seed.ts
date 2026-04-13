@@ -372,28 +372,44 @@ export default async function seedDemoData({ container }: ExecArgs) {
 
   logger.info("Seeding product data...");
 
+  const categoryTree = [
+    "Moteur",
+    "Freinage",
+    "Suspension",
+    "Carrosserie",
+    "Electricite",
+    "Transmission",
+    "Echappement",
+  ];
+
+  const vehicleSubcategories = ["Voiture", "Moto", "Scooter", "Quad"];
+
+  const { result: parentCategoryResult } = await createProductCategoriesWorkflow(
+    container
+  ).run({
+    input: {
+      product_categories: categoryTree.map((name) => ({
+        name,
+        is_active: true,
+      })),
+    },
+  });
+
+  const parentCategoryByName = new Map(
+    parentCategoryResult.map((category) => [category.name, category.id])
+  );
+
   const { result: categoryResult } = await createProductCategoriesWorkflow(
     container
   ).run({
     input: {
-      product_categories: [
-        {
-          name: "Shirts",
+      product_categories: categoryTree.flatMap((parentName) =>
+        vehicleSubcategories.map((subCategoryName) => ({
+          name: `${parentName} - ${subCategoryName}`,
           is_active: true,
-        },
-        {
-          name: "Sweatshirts",
-          is_active: true,
-        },
-        {
-          name: "Pants",
-          is_active: true,
-        },
-        {
-          name: "Merch",
-          is_active: true,
-        },
-      ],
+          parent_category_id: parentCategoryByName.get(parentName)!,
+        }))
+      ),
     },
   });
 
@@ -403,7 +419,7 @@ export default async function seedDemoData({ container }: ExecArgs) {
         {
           title: "Medusa T-Shirt",
           category_ids: [
-            categoryResult.find((cat) => cat.name === "Shirts")!.id,
+            categoryResult.find((cat) => cat.name === "Moteur - Voiture")!.id,
           ],
           description:
             "Reimagine the feeling of a classic T-shirt. With our cotton T-shirts, everyday essentials no longer have to be ordinary.",
@@ -590,7 +606,7 @@ export default async function seedDemoData({ container }: ExecArgs) {
         {
           title: "Medusa Sweatshirt",
           category_ids: [
-            categoryResult.find((cat) => cat.name === "Sweatshirts")!.id,
+            categoryResult.find((cat) => cat.name === "Freinage - Moto")!.id,
           ],
           description:
             "Reimagine the feeling of a classic sweatshirt. With our cotton sweatshirt, everyday essentials no longer have to be ordinary.",
@@ -691,7 +707,7 @@ export default async function seedDemoData({ container }: ExecArgs) {
         {
           title: "Medusa Sweatpants",
           category_ids: [
-            categoryResult.find((cat) => cat.name === "Pants")!.id,
+            categoryResult.find((cat) => cat.name === "Suspension - Scooter")!.id,
           ],
           description:
             "Reimagine the feeling of classic sweatpants. With our cotton sweatpants, everyday essentials no longer have to be ordinary.",
@@ -792,7 +808,7 @@ export default async function seedDemoData({ container }: ExecArgs) {
         {
           title: "Medusa Shorts",
           category_ids: [
-            categoryResult.find((cat) => cat.name === "Merch")!.id,
+            categoryResult.find((cat) => cat.name === "Carrosserie - Quad")!.id,
           ],
           description:
             "Reimagine the feeling of classic shorts. With our cotton shorts, everyday essentials no longer have to be ordinary.",
