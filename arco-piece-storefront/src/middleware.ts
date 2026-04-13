@@ -24,7 +24,7 @@ async function getRegionMap(cacheId: string) {
     regionMapUpdated < Date.now() - 3600 * 1000
   ) {
     // Fetch regions from Medusa. We can't use the JS client here because middleware is running on Edge and the client needs a Node environment.
-    const { regions } = await fetch(`${BACKEND_URL}/store/regions`, {
+    let { regions } = await fetch(`${BACKEND_URL}/store/regions`, {
       headers: {
         "x-publishable-api-key": PUBLISHABLE_API_KEY!,
       },
@@ -42,6 +42,26 @@ async function getRegionMap(cacheId: string) {
 
       return json
     })
+
+    // In development, the first cached response may be stale right after a DB reset.
+    if ((!regions || !regions.length) && process.env.NODE_ENV === "development") {
+      const fresh = await fetch(`${BACKEND_URL}/store/regions`, {
+        headers: {
+          "x-publishable-api-key": PUBLISHABLE_API_KEY!,
+        },
+        cache: "no-store",
+      }).then(async (response) => {
+        const json = await response.json()
+
+        if (!response.ok) {
+          throw new Error(json.message)
+        }
+
+        return json
+      })
+
+      regions = fresh.regions
+    }
 
     if (!regions?.length) {
       throw new Error(
