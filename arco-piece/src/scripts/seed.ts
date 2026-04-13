@@ -423,6 +423,13 @@ export default async function seedDemoData({ container }: ExecArgs) {
           ],
           description:
             "Reimagine the feeling of a classic T-shirt. With our cotton T-shirts, everyday essentials no longer have to be ordinary.",
+          metadata: {
+            vehicle_brand: "Peugeot",
+            model: "208",
+            year: "2021",
+            displacement_cc: "1200",
+            oem_reference: "OEM-PEU-208-ENG-001",
+          },
           handle: "t-shirt",
           weight: 400,
           status: ProductStatus.PUBLISHED,
@@ -610,6 +617,13 @@ export default async function seedDemoData({ container }: ExecArgs) {
           ],
           description:
             "Reimagine the feeling of a classic sweatshirt. With our cotton sweatshirt, everyday essentials no longer have to be ordinary.",
+          metadata: {
+            vehicle_brand: "Yamaha",
+            model: "MT-07",
+            year: "2020",
+            displacement_cc: "689",
+            oem_reference: "OEM-YAM-MT07-BRK-002",
+          },
           handle: "sweatshirt",
           weight: 400,
           status: ProductStatus.PUBLISHED,
@@ -711,6 +725,13 @@ export default async function seedDemoData({ container }: ExecArgs) {
           ],
           description:
             "Reimagine the feeling of classic sweatpants. With our cotton sweatpants, everyday essentials no longer have to be ordinary.",
+          metadata: {
+            vehicle_brand: "Piaggio",
+            model: "Vespa GTS",
+            year: "2019",
+            displacement_cc: "300",
+            oem_reference: "OEM-PIA-GTS-SUS-003",
+          },
           handle: "sweatpants",
           weight: 400,
           status: ProductStatus.PUBLISHED,
@@ -812,6 +833,13 @@ export default async function seedDemoData({ container }: ExecArgs) {
           ],
           description:
             "Reimagine the feeling of classic shorts. With our cotton shorts, everyday essentials no longer have to be ordinary.",
+          metadata: {
+            vehicle_brand: "Can-Am",
+            model: "Outlander",
+            year: "2022",
+            displacement_cc: "650",
+            oem_reference: "OEM-CAM-OUT-BDY-004",
+          },
           handle: "shorts",
           weight: 400,
           status: ProductStatus.PUBLISHED,
