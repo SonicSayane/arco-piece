@@ -4,6 +4,12 @@ import "styles/globals.css"
 
 export const metadata: Metadata = {
   metadataBase: new URL(getBaseURL()),
+  title: {
+    default: "Arco-Piece",
+    template: "%s | Arco-Piece",
+  },
+  description:
+    "Arco-Piece - boutique e-commerce de pieces mecaniques (voiture, moto, scooter, quad).",
 }
 
 export default function RootLayout(props: { children: React.ReactNode }) {
