@@ -1,6 +1,6 @@
 import { Metadata } from "next"
 import { notFound } from "next/navigation"
-import { listProducts } from "@lib/data/products"
+import { listAllProducts, listProducts } from "@lib/data/products"
 import { getRegion, listRegions } from "@lib/data/regions"
 import ProductTemplate from "@modules/products/templates"
 import { HttpTypes } from "@medusajs/types"
@@ -13,34 +13,46 @@ type Props = {
 export async function generateStaticParams() {
   try {
     const countryCodes = await listRegions().then((regions) =>
-      regions?.map((r) => r.countries?.map((c) => c.iso_2)).flat()
+      Array.from(
+        new Set(
+          (regions ?? [])
+            .flatMap((region) =>
+              (region.countries ?? []).map((country) => country.iso_2)
+            )
+            .filter((code): code is string => Boolean(code))
+        )
+      )
     )
 
-    if (!countryCodes) {
+    if (!countryCodes.length) {
       return []
     }
 
-    const promises = countryCodes.map(async (country) => {
-      const { response } = await listProducts({
-        countryCode: country,
-        queryParams: { limit: 100, fields: "handle" },
+    const countryProducts = await Promise.allSettled(
+      countryCodes.map(async (country) => {
+        const { products } = await listAllProducts({
+          countryCode: country,
+          queryParams: { limit: 100, fields: "handle" },
+        })
+
+        return {
+          country,
+          products,
+        }
       })
-
-      return {
-        country,
-        products: response.products,
-      }
-    })
-
-    const countryProducts = await Promise.all(promises)
+    )
 
     return countryProducts
-      .flatMap((countryData) =>
-        countryData.products.map((product) => ({
-          countryCode: countryData.country,
+      .flatMap((result) => {
+        if (result.status !== "fulfilled") {
+          return []
+        }
+
+        return result.value.products.map((product) => ({
+          countryCode: result.value.country,
           handle: product.handle,
         }))
-      )
+      })
       .filter((param) => param.handle)
   } catch (error) {
     console.error(
@@ -139,11 +151,11 @@ export default async function ProductPage(props: Props) {
     queryParams: { handle: params.handle },
   }).then(({ response }) => response.products[0])
 
-  const images = getImagesForVariant(pricedProduct, selectedVariantId)
-
   if (!pricedProduct) {
     notFound()
   }
+
+  const images = getImagesForVariant(pricedProduct, selectedVariantId)
 
   return (
     <ProductTemplate

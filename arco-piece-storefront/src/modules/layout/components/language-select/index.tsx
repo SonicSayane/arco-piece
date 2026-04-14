@@ -61,6 +61,10 @@ const getLocalizedLanguageName = (
   }
 }
 
+const isIsoCountryCode = (countryCode?: string): countryCode is string => {
+  return Boolean(countryCode && /^[a-z]{2}$/i.test(countryCode))
+}
+
 const DEFAULT_OPTION: LanguageOption = {
   code: "",
   name: "Default",
@@ -131,15 +135,14 @@ const LanguageSelect = ({
             <span>Language:</span>
             {current && (
               <span className="txt-compact-small flex items-center gap-x-2">
-                {current.countryCode && (
-                  /* @ts-ignore */
+                {isIsoCountryCode(current.countryCode) && (
                   <ReactCountryFlag
                     svg
                     style={{
                       width: "16px",
                       height: "16px",
                     }}
-                    countryCode={current.countryCode}
+                    countryCode={current.countryCode.toUpperCase()}
                   />
                 )}
                 {isPending ? "..." : current.localizedName}
@@ -165,15 +168,14 @@ const LanguageSelect = ({
                   value={o}
                   className="py-2 hover:bg-gray-200 px-3 cursor-pointer flex items-center gap-x-2"
                 >
-                  {o.countryCode ? (
-                    /* @ts-ignore */
+                  {isIsoCountryCode(o.countryCode) ? (
                     <ReactCountryFlag
                       svg
                       style={{
                         width: "16px",
                         height: "16px",
                       }}
-                      countryCode={o.countryCode}
+                      countryCode={o.countryCode.toUpperCase()}
                     />
                   ) : (
                     <span style={{ width: "16px", height: "16px" }} />

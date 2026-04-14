@@ -1,4 +1,4 @@
-import { listProducts } from "@lib/data/products"
+import { listAllProducts } from "@lib/data/products"
 import { getRegion } from "@lib/data/regions"
 import { sortProducts } from "@lib/util/sort-products"
 import ProductPreview from "@modules/products/components/product-preview"
@@ -6,7 +6,7 @@ import { Pagination } from "@modules/store/components/pagination"
 import { SortOptions } from "@modules/store/components/refinement-list/sort-products"
 
 const PRODUCT_LIMIT = 12
-const FILTER_FETCH_LIMIT = 100
+const FILTER_FETCH_PAGE_SIZE = 100
 
 type PaginatedProductsParams = {
   limit: number
@@ -38,7 +38,7 @@ export default async function PaginatedProducts({
   countryCode: string
 }) {
   const queryParams: PaginatedProductsParams = {
-    limit: FILTER_FETCH_LIMIT,
+    limit: FILTER_FETCH_PAGE_SIZE,
   }
 
   if (collectionId) {
@@ -63,10 +63,7 @@ export default async function PaginatedProducts({
     return null
   }
 
-  const {
-    response: { products: fetchedProducts },
-  } = await listProducts({
-    pageParam: 1,
+  const { products: fetchedProducts } = await listAllProducts({
     queryParams,
     countryCode,
   })

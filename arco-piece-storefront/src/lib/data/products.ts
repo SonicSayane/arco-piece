@@ -7,6 +7,12 @@ import { SortOptions } from "@modules/store/components/refinement-list/sort-prod
 import { getAuthHeaders, getCacheOptions } from "./cookies"
 import { getRegion, retrieveRegion } from "./regions"
 
+const DEFAULT_LIST_PAGE_SIZE = 100
+const MAX_LIST_PAGES = 50
+
+type ProductListQueryParams =
+  HttpTypes.FindParams & HttpTypes.StoreProductListParams
+
 export const listProducts = async ({
   pageParam = 1,
   queryParams,
@@ -14,13 +20,13 @@ export const listProducts = async ({
   regionId,
 }: {
   pageParam?: number
-  queryParams?: HttpTypes.FindParams & HttpTypes.StoreProductListParams
+  queryParams?: ProductListQueryParams
   countryCode?: string
   regionId?: string
 }): Promise<{
   response: { products: HttpTypes.StoreProduct[]; count: number }
   nextPage: number | null
-  queryParams?: HttpTypes.FindParams & HttpTypes.StoreProductListParams
+  queryParams?: ProductListQueryParams
 }> => {
   if (!countryCode && !regionId) {
     throw new Error("Country code or region ID is required")
@@ -85,8 +91,53 @@ export const listProducts = async ({
     })
 }
 
+export const listAllProducts = async ({
+  queryParams,
+  countryCode,
+  regionId,
+}: {
+  queryParams?: ProductListQueryParams
+  countryCode?: string
+  regionId?: string
+}): Promise<{ products: HttpTypes.StoreProduct[]; count: number }> => {
+  if (!countryCode && !regionId) {
+    throw new Error("Country code or region ID is required")
+  }
+
+  const pageSize = queryParams?.limit || DEFAULT_LIST_PAGE_SIZE
+  const allProducts: HttpTypes.StoreProduct[] = []
+  let totalCount = 0
+  let pageParam = 1
+
+  for (let currentPage = 0; currentPage < MAX_LIST_PAGES; currentPage++) {
+    const { response, nextPage } = await listProducts({
+      pageParam,
+      queryParams: {
+        ...queryParams,
+        limit: pageSize,
+      },
+      countryCode,
+      regionId,
+    })
+
+    allProducts.push(...response.products)
+    totalCount = response.count
+
+    if (!nextPage) {
+      break
+    }
+
+    pageParam = nextPage
+  }
+
+  return {
+    products: allProducts,
+    count: totalCount || allProducts.length,
+  }
+}
+
 /**
- * This will fetch 100 products to the Next.js cache and sort them based on the sortBy parameter.
+ * This fetches all products (paginated) and sorts them based on the sortBy parameter.
  * It will then return the paginated products based on the page and limit parameters.
  */
 export const listProductsWithSort = async ({
@@ -106,13 +157,10 @@ export const listProductsWithSort = async ({
 }> => {
   const limit = queryParams?.limit || 12
 
-  const {
-    response: { products, count },
-  } = await listProducts({
-    pageParam: 0,
+  const { products, count } = await listAllProducts({
     queryParams: {
       ...queryParams,
-      limit: 100,
+      limit: DEFAULT_LIST_PAGE_SIZE,
     },
     countryCode,
   })

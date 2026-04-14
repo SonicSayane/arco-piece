@@ -1,7 +1,7 @@
 import { Suspense } from "react"
 
 import { listCategories } from "@lib/data/categories"
-import { listProducts } from "@lib/data/products"
+import { listAllProducts } from "@lib/data/products"
 import SkeletonProductGrid from "@modules/skeletons/templates/skeleton-product-grid"
 import RefinementList from "@modules/store/components/refinement-list"
 import { SortOptions } from "@modules/store/components/refinement-list/sort-products"
@@ -30,8 +30,7 @@ const StoreTemplate = async ({
 
   const [categories, productsResponse] = await Promise.all([
     listCategories(),
-    listProducts({
-      pageParam: 1,
+    listAllProducts({
       queryParams: { limit: 100 },
       countryCode,
     }),
@@ -45,7 +44,7 @@ const StoreTemplate = async ({
     }))
     .sort((a, b) => a.label.localeCompare(b.label))
 
-  const products = productsResponse.response.products
+  const products = productsResponse.products
 
   const readMetadataValue = (metadata: unknown, key: string): string | null => {
     if (!metadata || typeof metadata !== "object") {

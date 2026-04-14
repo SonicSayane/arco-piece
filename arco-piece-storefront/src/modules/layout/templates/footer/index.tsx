@@ -132,12 +132,12 @@ export default async function Footer() {
                   </a>
                 </li>
                 <li>
-                  <a
+                  <LocalizedClientLink
                     href="/store"
                     className="hover:text-ui-fg-base"
                   >
                     Catalogue
-                  </a>
+                  </LocalizedClientLink>
                 </li>
               </ul>
             </div>

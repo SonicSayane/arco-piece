@@ -42,11 +42,23 @@ const getCurrencyPriority = (currencyCode?: string) => {
   return CURRENCY_PRIORITY[(currencyCode ?? "").toLowerCase()] ?? Number.MAX_SAFE_INTEGER
 }
 
+const isIsoCountryCode = (countryCode?: string): countryCode is string => {
+  return Boolean(countryCode && /^[a-z]{2}$/i.test(countryCode))
+}
+
 const CountrySelect = ({ toggleState, regions }: CountrySelectProps) => {
   const [current, setCurrent] = useState<CountryOption | undefined>(undefined)
 
-  const { countryCode } = useParams()
-  const currentPath = usePathname().split(`/${countryCode}`)[1]
+  const pathname = usePathname()
+  const params = useParams()
+  const routeCountryCode = params.countryCode
+  const countryCode = Array.isArray(routeCountryCode)
+    ? routeCountryCode[0]
+    : routeCountryCode
+  const currentPath =
+    countryCode && pathname.startsWith(`/${countryCode}`)
+      ? pathname.slice(`/${countryCode}`.length)
+      : ""
 
   const { state, close } = toggleState
 
@@ -83,7 +95,9 @@ const CountrySelect = ({ toggleState, regions }: CountrySelectProps) => {
 
   useEffect(() => {
     if (countryCode) {
-      const option = options?.find((o) => o?.country === countryCode)
+      const option = options?.find(
+        (o) => o?.country?.toLowerCase() === countryCode.toLowerCase()
+      )
       setCurrent(option)
     }
   }, [options, countryCode])
@@ -100,7 +114,9 @@ const CountrySelect = ({ toggleState, regions }: CountrySelectProps) => {
         onChange={handleChange}
         defaultValue={
           countryCode
-            ? options?.find((o) => o?.country === countryCode)
+            ? options?.find(
+                (o) => o?.country?.toLowerCase() === countryCode.toLowerCase()
+              )
             : undefined
         }
       >
@@ -109,15 +125,16 @@ const CountrySelect = ({ toggleState, regions }: CountrySelectProps) => {
             <span>Shipping to:</span>
             {current && (
               <span className="txt-compact-small flex items-center gap-x-2">
-                {/* @ts-ignore */}
-                <ReactCountryFlag
-                  svg
-                  style={{
-                    width: "16px",
-                    height: "16px",
-                  }}
-                  countryCode={current.country ?? ""}
-                />
+                {isIsoCountryCode(current.country) && (
+                  <ReactCountryFlag
+                    svg
+                    style={{
+                      width: "16px",
+                      height: "16px",
+                    }}
+                    countryCode={current.country.toUpperCase()}
+                  />
+                )}
                 {current.label}
               </span>
             )}
@@ -142,15 +159,18 @@ const CountrySelect = ({ toggleState, regions }: CountrySelectProps) => {
                     value={o}
                     className="py-2 hover:bg-gray-200 px-3 cursor-pointer flex items-center gap-x-2"
                   >
-                    {/* @ts-ignore */}
-                    <ReactCountryFlag
-                      svg
-                      style={{
-                        width: "16px",
-                        height: "16px",
-                      }}
-                      countryCode={o?.country ?? ""}
-                    />{" "}
+                    {isIsoCountryCode(o?.country) ? (
+                      <ReactCountryFlag
+                        svg
+                        style={{
+                          width: "16px",
+                          height: "16px",
+                        }}
+                        countryCode={o.country.toUpperCase()}
+                      />
+                    ) : (
+                      <span style={{ width: "16px", height: "16px" }} />
+                    )}{" "}
                     {o?.label}
                   </ListboxOption>
                 )

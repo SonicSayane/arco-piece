@@ -7,7 +7,23 @@ const siteUrl =
 
 const backendUrl = process.env.MEDUSA_BACKEND_URL || "http://localhost:9000"
 const publishableKey = process.env.NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY
-const fallbackCountryCodes = ["dk", "fr", "de", "it", "es", "se", "gb"]
+const fallbackCountryCodes = [
+  "ne",
+  "bj",
+  "bf",
+  "ci",
+  "gw",
+  "ml",
+  "sn",
+  "tg",
+  "fr",
+  "de",
+  "it",
+  "es",
+  "se",
+  "gb",
+  "dk",
+]
 
 const noIndexPaths = new Set([
   "/icon.svg",

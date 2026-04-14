@@ -1,4 +1,5 @@
 import { Button, Heading } from "@medusajs/ui"
+import LocalizedClientLink from "@modules/common/components/localized-client-link"
 
 const Hero = () => {
   return (
@@ -18,9 +19,9 @@ const Hero = () => {
             Pieces mecaniques auto, moto, scooter et quad
           </Heading>
         </span>
-        <a href="/store">
+        <LocalizedClientLink href="/store">
           <Button variant="secondary">Voir le catalogue</Button>
-        </a>
+        </LocalizedClientLink>
       </div>
     </div>
   )
