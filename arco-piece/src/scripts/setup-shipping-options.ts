@@ -1,9 +1,17 @@
 import { ExecArgs } from "@medusajs/framework/types";
 import { ContainerRegistrationKeys } from "@medusajs/framework/utils";
-import { createShippingOptionsWorkflow } from "@medusajs/medusa/core-flows";
+import {
+  createShippingOptionsWorkflow,
+  updateShippingOptionsWorkflow,
+} from "@medusajs/medusa/core-flows";
 
 type ShippingOptionLite = {
+  id: string;
   name: string;
+  service_zone_id?: string;
+  prices?: Array<{
+    currency_code?: string;
+  }>;
 };
 
 type ShippingProfileLite = {
@@ -12,10 +20,6 @@ type ShippingProfileLite = {
 };
 
 type ServiceZoneLite = {
-  id: string;
-};
-
-type RegionLite = {
   id: string;
 };
 
@@ -49,6 +53,11 @@ const SHIPPING_METHODS = [
   },
 ] as const;
 
+const XOF_PER_EUR_CENT = 6.56;
+
+const toXofAmount = (eurAmount: number) =>
+  Math.max(1, Math.round(eurAmount * XOF_PER_EUR_CENT));
+
 export default async function setupShippingOptions({ container }: ExecArgs) {
   const logger = container.resolve(ContainerRegistrationKeys.LOGGER);
 
@@ -60,84 +69,137 @@ export default async function setupShippingOptions({ container }: ExecArgs) {
     }) => Promise<{ data: Array<Record<string, unknown>> }>;
   };
 
-  const [existingOptionsResult, shippingProfilesResult, serviceZonesResult, regionsResult] =
+  const [existingOptionsResult, shippingProfilesResult, serviceZonesResult] =
     await Promise.all([
-      query.graph({ entity: "shipping_option", fields: ["id", "name"] }),
+      query.graph({
+        entity: "shipping_option",
+        fields: [
+          "id",
+          "name",
+          "service_zone_id",
+          "prices.currency_code",
+        ],
+      }),
       query.graph({ entity: "shipping_profile", fields: ["id", "type"] }),
       query.graph({ entity: "service_zone", fields: ["id"] }),
-      query.graph({ entity: "region", fields: ["id"] }),
     ]);
 
   const existingOptions = existingOptionsResult.data as ShippingOptionLite[];
   const shippingProfiles = shippingProfilesResult.data as ShippingProfileLite[];
   const serviceZones = serviceZonesResult.data as ServiceZoneLite[];
-  const regions = regionsResult.data as RegionLite[];
 
   const shippingProfileId =
     shippingProfiles.find((profile) => profile.type === "default")?.id ??
     shippingProfiles[0]?.id;
-  const serviceZoneId = serviceZones[0]?.id;
-  const regionId = regions[0]?.id;
+  const serviceZoneIds = serviceZones.map((serviceZone) => serviceZone.id);
 
-  if (!shippingProfileId || !serviceZoneId || !regionId) {
+  if (!shippingProfileId || !serviceZoneIds.length) {
     throw new Error(
-      "Missing shipping profile, service zone, or region. Ensure base seed data exists before running setup-shipping-options."
+      "Missing shipping profile or service zone. Ensure base seed data exists before running setup-shipping-options."
     );
   }
 
-  const existingOptionNames = new Set(
-    existingOptions.map((option) => option.name.trim().toLowerCase())
-  );
+  const optionsToCreate: any[] = [];
+  const optionsToUpdate: any[] = [];
 
-  const missingOptions = SHIPPING_METHODS.filter((method) => {
-    return !existingOptionNames.has(method.name.toLowerCase());
-  });
+  for (const serviceZoneId of serviceZoneIds) {
+    for (const method of SHIPPING_METHODS) {
+      const existingOption = existingOptions.find((option) => {
+        return (
+          option.service_zone_id === serviceZoneId &&
+          option.name.trim().toLowerCase() === method.name.toLowerCase()
+        );
+      });
 
-  if (!missingOptions.length) {
-    logger.info("All shipping methods already exist. Nothing to create.");
-    return;
+      if (!existingOption) {
+        optionsToCreate.push({
+          name: method.name,
+          price_type: "flat",
+          provider_id: "manual_manual",
+          service_zone_id: serviceZoneId,
+          shipping_profile_id: shippingProfileId,
+          type: method.type,
+          prices: [
+            {
+              currency_code: "usd",
+              amount: method.amount,
+            },
+            {
+              currency_code: "eur",
+              amount: method.amount,
+            },
+            {
+              currency_code: "xof",
+              amount: toXofAmount(method.amount),
+            },
+          ],
+          rules: [
+            {
+              attribute: "enabled_in_store",
+              value: "true",
+              operator: "eq",
+            },
+            {
+              attribute: "is_return",
+              value: "false",
+              operator: "eq",
+            },
+          ],
+        });
+
+        continue;
+      }
+
+      const existingCurrencies = (existingOption.prices ?? [])
+        .map((price) => price.currency_code?.toLowerCase())
+        .filter((currency): currency is string => Boolean(currency));
+
+      const expectedCurrencies = ["eur", "usd", "xof"];
+      const hasAllExpectedCurrencies = expectedCurrencies.every((currency) => {
+        return existingCurrencies.includes(currency);
+      });
+      const hasDuplicateCurrencies =
+        new Set(existingCurrencies).size !== existingCurrencies.length;
+
+      if (!hasAllExpectedCurrencies || hasDuplicateCurrencies) {
+        optionsToUpdate.push({
+          id: existingOption.id,
+          prices: [
+            {
+              currency_code: "usd",
+              amount: method.amount,
+            },
+            {
+              currency_code: "eur",
+              amount: method.amount,
+            },
+            {
+              currency_code: "xof",
+              amount: toXofAmount(method.amount),
+            },
+          ],
+        });
+      }
+    }
   }
 
-  await createShippingOptionsWorkflow(container).run({
-    input: missingOptions.map((method) => ({
-      name: method.name,
-      price_type: "flat",
-      provider_id: "manual_manual",
-      service_zone_id: serviceZoneId,
-      shipping_profile_id: shippingProfileId,
-      type: method.type,
-      prices: [
-        {
-          currency_code: "usd",
-          amount: method.amount,
-        },
-        {
-          currency_code: "eur",
-          amount: method.amount,
-        },
-        {
-          region_id: regionId,
-          amount: method.amount,
-        },
-      ],
-      rules: [
-        {
-          attribute: "enabled_in_store",
-          value: "true",
-          operator: "eq",
-        },
-        {
-          attribute: "is_return",
-          value: "false",
-          operator: "eq",
-        },
-      ],
-    })),
-  });
+  if (optionsToCreate.length) {
+    await createShippingOptionsWorkflow(container).run({
+      input: optionsToCreate,
+    });
 
-  logger.info(
-    `Created ${missingOptions.length} shipping method(s): ${missingOptions
-      .map((option) => option.name)
-      .join(", ")}`
-  );
+    logger.info(`Created ${optionsToCreate.length} shipping option(s).`);
+  }
+
+  if (optionsToUpdate.length) {
+    await updateShippingOptionsWorkflow(container).run({
+      input: optionsToUpdate,
+    });
+
+    logger.info(`Updated ${optionsToUpdate.length} shipping option(s) with XOF.`);
+  }
+
+  if (!optionsToCreate.length && !optionsToUpdate.length) {
+    logger.info("All shipping methods already exist with XOF pricing.");
+  }
 }

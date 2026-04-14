@@ -19,6 +19,7 @@ type CountryOption = {
   country: string
   region: string
   label: string
+  currencyCode: string
 }
 
 type CountrySelectProps = {
@@ -26,11 +27,23 @@ type CountrySelectProps = {
   regions: HttpTypes.StoreRegion[]
 }
 
+const COUNTRY_PRIORITY = ["ne", "fr"]
+const CURRENCY_PRIORITY: Record<string, number> = {
+  xof: 0,
+  eur: 1,
+}
+
+const getCountryPriority = (countryCode?: string) => {
+  const index = COUNTRY_PRIORITY.indexOf((countryCode ?? "").toLowerCase())
+  return index === -1 ? Number.MAX_SAFE_INTEGER : index
+}
+
+const getCurrencyPriority = (currencyCode?: string) => {
+  return CURRENCY_PRIORITY[(currencyCode ?? "").toLowerCase()] ?? Number.MAX_SAFE_INTEGER
+}
+
 const CountrySelect = ({ toggleState, regions }: CountrySelectProps) => {
-  const [current, setCurrent] = useState<
-    | { country: string | undefined; region: string; label: string | undefined }
-    | undefined
-  >(undefined)
+  const [current, setCurrent] = useState<CountryOption | undefined>(undefined)
 
   const { countryCode } = useParams()
   const currentPath = usePathname().split(`/${countryCode}`)[1]
@@ -44,10 +57,28 @@ const CountrySelect = ({ toggleState, regions }: CountrySelectProps) => {
           country: c.iso_2,
           region: r.id,
           label: c.display_name,
+          currencyCode: r.currency_code ?? "",
         }))
       })
       .flat()
-      .sort((a, b) => (a?.label ?? "").localeCompare(b?.label ?? ""))
+      .sort((a, b) => {
+        const countryPriorityDelta =
+          getCountryPriority(a?.country) - getCountryPriority(b?.country)
+
+        if (countryPriorityDelta !== 0) {
+          return countryPriorityDelta
+        }
+
+        const currencyPriorityDelta =
+          getCurrencyPriority(a?.currencyCode) -
+          getCurrencyPriority(b?.currencyCode)
+
+        if (currencyPriorityDelta !== 0) {
+          return currencyPriorityDelta
+        }
+
+        return (a?.label ?? "").localeCompare(b?.label ?? "")
+      })
   }, [regions])
 
   useEffect(() => {

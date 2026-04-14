@@ -16,6 +16,7 @@
     "build": "medusa build",
     "seed": "medusa exec ./src/scripts/seed.ts",
     "shipping:setup": "medusa exec ./src/scripts/setup-shipping-options.ts",
+    "market:setup": "medusa exec ./src/scripts/setup-west-africa-market.ts",
     "admin:invite": "medusa user --invite",
     "start": "medusa start",
     "dev": "medusa develop",

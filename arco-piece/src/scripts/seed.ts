@@ -55,6 +55,69 @@ const updateStoreCurrencies = createWorkflow(
   }
 );
 
+const EUROPE_COUNTRIES = ["gb", "de", "dk", "se", "fr", "es", "it"];
+const WEST_AFRICA_COUNTRIES = ["ne", "bj", "bf", "ci", "gw", "ml", "sn", "tg"];
+const ALL_REGION_COUNTRIES = [...new Set([...EUROPE_COUNTRIES, ...WEST_AFRICA_COUNTRIES])];
+
+const SHIPPING_METHODS = [
+  {
+    name: "Standard Shipping",
+    type: {
+      label: "Standard",
+      description: "Ship in 2-3 days.",
+      code: "standard",
+    },
+    amount: 10,
+  },
+  {
+    name: "Express Shipping",
+    type: {
+      label: "Express",
+      description: "Ship in 24 hours.",
+      code: "express",
+    },
+    amount: 10,
+  },
+  {
+    name: "Relay Point Pickup",
+    type: {
+      label: "Point Relais",
+      description: "Pickup from a nearby relay point.",
+      code: "point-relais",
+    },
+    amount: 5,
+  },
+] as const;
+
+const XOF_PER_EUR_CENT = 6.56;
+
+const toXofAmount = (eurAmount: number) =>
+  Math.max(1, Math.round(eurAmount * XOF_PER_EUR_CENT));
+
+type VariantPrice = {
+  amount: number;
+  currency_code: string;
+};
+
+const withXofPrice = (prices: VariantPrice[]) => {
+  if (prices.some((price) => price.currency_code?.toLowerCase() === "xof")) {
+    return prices;
+  }
+
+  const eurPriceAmount = prices.find(
+    (price) => price.currency_code?.toLowerCase() === "eur"
+  )?.amount;
+  const fallbackAmount = typeof eurPriceAmount === "number" ? eurPriceAmount : prices[0]?.amount ?? 10;
+
+  return [
+    ...prices,
+    {
+      amount: toXofAmount(fallbackAmount),
+      currency_code: "xof",
+    },
+  ];
+};
+
 export default async function seedDemoData({ container }: ExecArgs) {
   const logger = container.resolve(ContainerRegistrationKeys.LOGGER);
   const link = container.resolve(ContainerRegistrationKeys.LINK);
@@ -62,8 +125,6 @@ export default async function seedDemoData({ container }: ExecArgs) {
   const fulfillmentModuleService = container.resolve(Modules.FULFILLMENT);
   const salesChannelModuleService = container.resolve(Modules.SALES_CHANNEL);
   const storeModuleService = container.resolve(Modules.STORE);
-
-  const countries = ["gb", "de", "dk", "se", "fr", "es", "it"];
 
   logger.info("Seeding store data...");
   const [store] = await storeModuleService.listStores();
@@ -98,6 +159,9 @@ export default async function seedDemoData({ container }: ExecArgs) {
         {
           currency_code: "usd",
         },
+        {
+          currency_code: "xof",
+        },
       ],
     },
   });
@@ -117,18 +181,31 @@ export default async function seedDemoData({ container }: ExecArgs) {
         {
           name: "Europe",
           currency_code: "eur",
-          countries,
+          countries: EUROPE_COUNTRIES,
+          payment_providers: ["pp_system_default", "pp_stripe_stripe"],
+        },
+        {
+          name: "West Africa",
+          currency_code: "xof",
+          countries: WEST_AFRICA_COUNTRIES,
           payment_providers: ["pp_system_default", "pp_stripe_stripe"],
         },
       ],
     },
   });
-  const region = regionResult[0];
+  const europeRegion = regionResult.find((region) => region.name === "Europe");
+  const westAfricaRegion = regionResult.find(
+    (region) => region.name === "West Africa"
+  );
+
+  if (!europeRegion || !westAfricaRegion) {
+    throw new Error("Failed to create Europe and West Africa regions.");
+  }
   logger.info("Finished seeding regions.");
 
   logger.info("Seeding tax regions...");
   await createTaxRegionsWorkflow(container).run({
-    input: countries.map((country_code) => ({
+    input: ALL_REGION_COUNTRIES.map((country_code) => ({
       country_code,
       provider_id: "tp_system",
     })),
@@ -142,7 +219,7 @@ export default async function seedDemoData({ container }: ExecArgs) {
     input: {
       locations: [
         {
-          name: "European Warehouse",
+          name: "Global Warehouse",
           address: {
             city: "Copenhagen",
             country_code: "DK",
@@ -194,41 +271,15 @@ export default async function seedDemoData({ container }: ExecArgs) {
   }
 
   const fulfillmentSet = await fulfillmentModuleService.createFulfillmentSets({
-    name: "European Warehouse delivery",
+    name: "Global Warehouse delivery",
     type: "shipping",
     service_zones: [
       {
-        name: "Europe",
-        geo_zones: [
-          {
-            country_code: "gb",
-            type: "country",
-          },
-          {
-            country_code: "de",
-            type: "country",
-          },
-          {
-            country_code: "dk",
-            type: "country",
-          },
-          {
-            country_code: "se",
-            type: "country",
-          },
-          {
-            country_code: "fr",
-            type: "country",
-          },
-          {
-            country_code: "es",
-            type: "country",
-          },
-          {
-            country_code: "it",
-            type: "country",
-          },
-        ],
+        name: "International",
+        geo_zones: ALL_REGION_COUNTRIES.map((country_code) => ({
+          country_code,
+          type: "country" as const,
+        })),
       },
     ],
   });
@@ -243,122 +294,40 @@ export default async function seedDemoData({ container }: ExecArgs) {
   });
 
   await createShippingOptionsWorkflow(container).run({
-    input: [
-      {
-        name: "Standard Shipping",
-        price_type: "flat",
-        provider_id: "manual_manual",
-        service_zone_id: fulfillmentSet.service_zones[0].id,
-        shipping_profile_id: shippingProfile.id,
-        type: {
-          label: "Standard",
-          description: "Ship in 2-3 days.",
-          code: "standard",
+    input: SHIPPING_METHODS.map((method) => ({
+      name: method.name,
+      price_type: "flat",
+      provider_id: "manual_manual",
+      service_zone_id: fulfillmentSet.service_zones[0].id,
+      shipping_profile_id: shippingProfile.id,
+      type: method.type,
+      prices: [
+        {
+          currency_code: "usd",
+          amount: method.amount,
         },
-        prices: [
-          {
-            currency_code: "usd",
-            amount: 10,
-          },
-          {
-            currency_code: "eur",
-            amount: 10,
-          },
-          {
-            region_id: region.id,
-            amount: 10,
-          },
-        ],
-        rules: [
-          {
-            attribute: "enabled_in_store",
-            value: "true",
-            operator: "eq",
-          },
-          {
-            attribute: "is_return",
-            value: "false",
-            operator: "eq",
-          },
-        ],
-      },
-      {
-        name: "Express Shipping",
-        price_type: "flat",
-        provider_id: "manual_manual",
-        service_zone_id: fulfillmentSet.service_zones[0].id,
-        shipping_profile_id: shippingProfile.id,
-        type: {
-          label: "Express",
-          description: "Ship in 24 hours.",
-          code: "express",
+        {
+          currency_code: "eur",
+          amount: method.amount,
         },
-        prices: [
-          {
-            currency_code: "usd",
-            amount: 10,
-          },
-          {
-            currency_code: "eur",
-            amount: 10,
-          },
-          {
-            region_id: region.id,
-            amount: 10,
-          },
-        ],
-        rules: [
-          {
-            attribute: "enabled_in_store",
-            value: "true",
-            operator: "eq",
-          },
-          {
-            attribute: "is_return",
-            value: "false",
-            operator: "eq",
-          },
-        ],
-      },
-      {
-        name: "Relay Point Pickup",
-        price_type: "flat",
-        provider_id: "manual_manual",
-        service_zone_id: fulfillmentSet.service_zones[0].id,
-        shipping_profile_id: shippingProfile.id,
-        type: {
-          label: "Point Relais",
-          description: "Pickup from a nearby relay point.",
-          code: "point-relais",
+        {
+          currency_code: "xof",
+          amount: toXofAmount(method.amount),
         },
-        prices: [
-          {
-            currency_code: "usd",
-            amount: 5,
-          },
-          {
-            currency_code: "eur",
-            amount: 5,
-          },
-          {
-            region_id: region.id,
-            amount: 5,
-          },
-        ],
-        rules: [
-          {
-            attribute: "enabled_in_store",
-            value: "true",
-            operator: "eq",
-          },
-          {
-            attribute: "is_return",
-            value: "false",
-            operator: "eq",
-          },
-        ],
-      },
-    ],
+      ],
+      rules: [
+        {
+          attribute: "enabled_in_store",
+          value: "true",
+          operator: "eq",
+        },
+        {
+          attribute: "is_return",
+          value: "false",
+          operator: "eq",
+        },
+      ],
+    })),
   });
   logger.info("Finished seeding fulfillment data.");
 
@@ -972,7 +941,13 @@ export default async function seedDemoData({ container }: ExecArgs) {
             },
           ],
         },
-      ],
+      ].map((product) => ({
+        ...product,
+        variants: product.variants?.map((variant) => ({
+          ...variant,
+          prices: withXofPrice(variant.prices ?? []),
+        })),
+      })),
     },
   });
   logger.info("Finished seeding product data.");
