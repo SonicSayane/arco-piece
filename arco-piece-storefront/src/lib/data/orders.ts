@@ -6,8 +6,14 @@ import { getAuthHeaders, getCacheOptions } from "./cookies"
 import { HttpTypes } from "@medusajs/types"
 
 export const retrieveOrder = async (id: string) => {
+  const authHeaders = await getAuthHeaders()
+
+  if (!("authorization" in authHeaders)) {
+    return null
+  }
+
   const headers = {
-    ...(await getAuthHeaders()),
+    ...authHeaders,
   }
 
   const next = {
@@ -34,8 +40,14 @@ export const listOrders = async (
   offset: number = 0,
   filters?: Record<string, any>
 ) => {
+  const authHeaders = await getAuthHeaders()
+
+  if (!("authorization" in authHeaders)) {
+    return []
+  }
+
   const headers = {
-    ...(await getAuthHeaders()),
+    ...authHeaders,
   }
 
   const next = {
