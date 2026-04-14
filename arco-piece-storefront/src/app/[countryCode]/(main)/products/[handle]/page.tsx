@@ -87,12 +87,37 @@ export async function generateMetadata(props: Props): Promise<Metadata> {
     notFound()
   }
 
+  const metadata = (product.metadata ?? {}) as Record<string, unknown>
+  const oem = typeof metadata.oem_reference === "string" ? metadata.oem_reference : null
+
+  const description = [
+    product.description,
+    oem ? `Reference OEM: ${oem}` : null,
+  ]
+    .filter((value): value is string => Boolean(value && value.trim()))
+    .join(" - ")
+    .slice(0, 300)
+
+  const title = `${product.title} | Arco-Piece`
+  const canonicalPath = `/${params.countryCode}/products/${handle}`
+
   return {
-    title: `${product.title} | Arco-Piece`,
-    description: `${product.title}`,
+    title,
+    description: description || product.title,
+    alternates: {
+      canonical: canonicalPath,
+    },
     openGraph: {
-      title: `${product.title} | Arco-Piece`,
-      description: `${product.title}`,
+      type: "website",
+      title,
+      description: description || product.title,
+      url: canonicalPath,
+      images: product.thumbnail ? [product.thumbnail] : [],
+    },
+    twitter: {
+      card: "summary_large_image",
+      title,
+      description: description || product.title,
       images: product.thumbnail ? [product.thumbnail] : [],
     },
   }
