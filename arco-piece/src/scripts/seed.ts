@@ -320,6 +320,44 @@ export default async function seedDemoData({ container }: ExecArgs) {
           },
         ],
       },
+      {
+        name: "Relay Point Pickup",
+        price_type: "flat",
+        provider_id: "manual_manual",
+        service_zone_id: fulfillmentSet.service_zones[0].id,
+        shipping_profile_id: shippingProfile.id,
+        type: {
+          label: "Point Relais",
+          description: "Pickup from a nearby relay point.",
+          code: "point-relais",
+        },
+        prices: [
+          {
+            currency_code: "usd",
+            amount: 5,
+          },
+          {
+            currency_code: "eur",
+            amount: 5,
+          },
+          {
+            region_id: region.id,
+            amount: 5,
+          },
+        ],
+        rules: [
+          {
+            attribute: "enabled_in_store",
+            value: "true",
+            operator: "eq",
+          },
+          {
+            attribute: "is_return",
+            value: "false",
+            operator: "eq",
+          },
+        ],
+      },
     ],
   });
   logger.info("Finished seeding fulfillment data.");
