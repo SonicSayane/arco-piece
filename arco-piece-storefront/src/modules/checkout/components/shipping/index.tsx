@@ -11,7 +11,7 @@ import ErrorMessage from "@modules/checkout/components/error-message"
 import Divider from "@modules/common/components/divider"
 import MedusaRadio from "@modules/common/components/radio"
 import { usePathname, useRouter, useSearchParams } from "next/navigation"
-import { useEffect, useState } from "react"
+import { useEffect, useMemo, useState } from "react"
 
 const PICKUP_OPTION_ON = "__PICKUP_ON"
 const PICKUP_OPTION_OFF = "__PICKUP_OFF"
@@ -70,21 +70,25 @@ const Shipping: React.FC<ShippingProps> = ({
 
   const isOpen = searchParams.get("step") === "delivery"
 
-  const _shippingMethods = availableShippingMethods?.filter(
-    (sm) => sm.service_zone?.fulfillment_set?.type !== "pickup"
+  const { shippingMethods, pickupMethods } = useMemo(
+    () => ({
+      shippingMethods: availableShippingMethods?.filter(
+        (sm) => sm.service_zone?.fulfillment_set?.type !== "pickup"
+      ),
+      pickupMethods: availableShippingMethods?.filter(
+        (sm) => sm.service_zone?.fulfillment_set?.type === "pickup"
+      ),
+    }),
+    [availableShippingMethods]
   )
 
-  const _pickupMethods = availableShippingMethods?.filter(
-    (sm) => sm.service_zone?.fulfillment_set?.type === "pickup"
-  )
-
-  const hasPickupOptions = !!_pickupMethods?.length
+  const hasPickupOptions = !!pickupMethods?.length
 
   useEffect(() => {
     setIsLoadingPrices(true)
 
-    if (_shippingMethods?.length) {
-      const promises = _shippingMethods
+    if (shippingMethods?.length) {
+      const promises = shippingMethods
         .filter((sm) => sm.price_type === "calculated")
         .map((sm) => calculatePriceForShippingOption(sm.id, cart.id))
 
@@ -101,10 +105,10 @@ const Shipping: React.FC<ShippingProps> = ({
       }
     }
 
-    if (_pickupMethods?.find((m) => m.id === shippingMethodId)) {
+    if (pickupMethods?.find((m) => m.id === shippingMethodId)) {
       setShowPickupOptions(PICKUP_OPTION_ON)
     }
-  }, [availableShippingMethods])
+  }, [shippingMethods, pickupMethods, cart.id, shippingMethodId])
 
   const handleEdit = () => {
     router.push(pathname + "?step=delivery", { scroll: false })
@@ -198,7 +202,7 @@ const Shipping: React.FC<ShippingProps> = ({
                   <RadioGroup
                     value={showPickupOptions}
                     onChange={(value) => {
-                      const id = _pickupMethods.find(
+                      const id = pickupMethods.find(
                         (option) => !option.insufficient_inventory
                       )?.id
 
@@ -240,7 +244,7 @@ const Shipping: React.FC<ShippingProps> = ({
                     }
                   }}
                 >
-                  {_shippingMethods?.map((option) => {
+                  {shippingMethods?.map((option) => {
                     const isDisabled =
                       option.price_type === "calculated" &&
                       !isLoadingPrices &&
@@ -315,7 +319,7 @@ const Shipping: React.FC<ShippingProps> = ({
                       }
                     }}
                   >
-                    {_pickupMethods?.map((option) => {
+                    {pickupMethods?.map((option) => {
                       return (
                         <Radio
                           key={option.id}
