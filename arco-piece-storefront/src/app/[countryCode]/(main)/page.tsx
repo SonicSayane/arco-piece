@@ -4,6 +4,7 @@ import FeaturedProducts from "@modules/home/components/featured-products"
 import Hero from "@modules/home/components/hero"
 import { listCollections } from "@lib/data/collections"
 import { getRegion } from "@lib/data/regions"
+import { Heading, Text } from "@medusajs/ui"
 
 export const metadata: Metadata = {
   title: "Accueil",
@@ -31,11 +32,23 @@ export default async function Home(props: {
   return (
     <>
       <Hero />
-      <div className="py-12">
-        <ul className="flex flex-col gap-x-6">
+      <section className="pb-14 small:pb-20">
+        <div className="content-container mt-2 mb-6 small:mb-8">
+          <Text className="font-body text-xs uppercase tracking-[0.18em] text-[var(--arc-accent)]">
+            Catalogue
+          </Text>
+          <Heading
+            level="h2"
+            className="font-display mt-2 text-3xl small:text-4xl text-arc-ink"
+          >
+            Collections en vedette
+          </Heading>
+        </div>
+
+        <ul className="flex flex-col gap-y-2 small:gap-y-4">
           <FeaturedProducts collections={collections} region={region} />
         </ul>
-      </div>
+      </section>
     </>
   )
 }

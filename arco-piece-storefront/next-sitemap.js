@@ -31,6 +31,9 @@ const noIndexPaths = new Set([
   "/twitter-image.jpg",
 ])
 
+const SITEMAP_PAGE_SIZE = 100
+const SITEMAP_MAX_PAGES = 50
+
 const fetchStoreData = async (path) => {
   try {
     const response = await fetch(`${backendUrl}${path}`, {
@@ -69,25 +72,47 @@ const getCountryCodes = async () => {
   )
 }
 
-const getHandles = async (resourcePath, responseField) => {
-  const data = await fetchStoreData(resourcePath)
+const appendQuery = (path, query) =>
+  `${path}${path.includes("?") ? "&" : "?"}${query}`
 
-  if (!data?.[responseField]?.length) {
-    return []
+const getHandles = async (resourcePath, responseField) => {
+  const handles = new Set()
+
+  for (let page = 0; page < SITEMAP_MAX_PAGES; page++) {
+    const offset = page * SITEMAP_PAGE_SIZE
+    const pagedPath = appendQuery(
+      resourcePath,
+      `limit=${SITEMAP_PAGE_SIZE}&offset=${offset}`
+    )
+
+    const data = await fetchStoreData(pagedPath)
+    const items = data?.[responseField] || []
+
+    if (!items.length) {
+      break
+    }
+
+    for (const item of items) {
+      if (typeof item?.handle === "string" && item.handle.length > 0) {
+        handles.add(item.handle)
+      }
+    }
+
+    if (items.length < SITEMAP_PAGE_SIZE) {
+      break
+    }
   }
 
-  return data[responseField]
-    .map((item) => item.handle)
-    .filter((handle) => typeof handle === "string" && handle.length > 0)
+  return Array.from(handles)
 }
 
 const buildAdditionalPaths = async (config) => {
   const [countries, productHandles, collectionHandles, categoryHandles] =
     await Promise.all([
       getCountryCodes(),
-      getHandles("/store/products?limit=100&fields=handle", "products"),
-      getHandles("/store/collections?limit=100&fields=handle", "collections"),
-      getHandles("/store/product-categories?limit=100&fields=handle", "product_categories"),
+      getHandles("/store/products?fields=handle", "products"),
+      getHandles("/store/collections?fields=handle", "collections"),
+      getHandles("/store/product-categories?fields=handle", "product_categories"),
     ])
 
   if (!countries.length) {

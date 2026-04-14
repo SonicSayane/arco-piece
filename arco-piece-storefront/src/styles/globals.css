@@ -2,7 +2,106 @@
 @import "tailwindcss/components";
 @import "tailwindcss/utilities";
 
+@layer base {
+  :root {
+    --arc-background: #f6efe3;
+    --arc-surface: #fffbf5;
+    --arc-surface-strong: #fff7eb;
+    --arc-ink: #1f2937;
+    --arc-muted: #64748b;
+    --arc-accent: #c2410c;
+    --arc-accent-soft: #fed7aa;
+    --arc-divider: #e7dbc9;
+  }
+
+  body {
+    background-image:
+      radial-gradient(circle at 12% 18%, rgba(194, 65, 12, 0.12) 0%, transparent 35%),
+      radial-gradient(circle at 85% 0%, rgba(14, 165, 233, 0.1) 0%, transparent 30%),
+      linear-gradient(180deg, #f6efe3 0%, #fdfaf4 42%, #f6efe3 100%);
+    color: var(--arc-ink);
+  }
+}
+
 @layer utilities {
+  .font-body {
+    font-family: var(--font-body), "Segoe UI", sans-serif;
+  }
+
+  .font-display {
+    font-family: var(--font-display), "Trebuchet MS", sans-serif;
+    letter-spacing: -0.02em;
+  }
+
+  .text-arc-ink {
+    color: var(--arc-ink);
+  }
+
+  .text-arc-muted {
+    color: var(--arc-muted);
+  }
+
+  .bg-arc-background {
+    background-color: var(--arc-background);
+  }
+
+  .bg-arc-surface {
+    background-color: var(--arc-surface);
+  }
+
+  .bg-arc-surface-strong {
+    background-color: var(--arc-surface-strong);
+  }
+
+  .border-arc-divider {
+    border-color: var(--arc-divider);
+  }
+
+  .arc-panel {
+    background: linear-gradient(165deg, rgba(255, 251, 245, 0.95), rgba(255, 247, 235, 0.9));
+    border: 1px solid var(--arc-divider);
+    box-shadow: 0 14px 35px rgba(15, 23, 42, 0.08);
+    backdrop-filter: blur(2px);
+  }
+
+  @keyframes arc-fade-up {
+    from {
+      opacity: 0;
+      transform: translateY(22px);
+    }
+
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  @keyframes arc-fade-in {
+    from {
+      opacity: 0;
+    }
+
+    to {
+      opacity: 1;
+    }
+  }
+
+  .animate-arc-fade-up {
+    animation: arc-fade-up 650ms cubic-bezier(0.2, 0.75, 0.2, 1) both;
+  }
+
+  .animate-arc-fade-in {
+    animation: arc-fade-in 500ms ease both;
+  }
+
+  .animation-delay-150 {
+    animation-delay: 150ms;
+  }
+
+  .animation-delay-300 {
+    animation-delay: 300ms;
+  }
+
   /* Chrome, Safari and Opera */
   .no-scrollbar::-webkit-scrollbar {
     display: none;

@@ -1,6 +1,19 @@
 import { getBaseURL } from "@lib/util/env"
 import { Metadata } from "next"
+import { Manrope, Space_Grotesk } from "next/font/google"
 import "../styles/globals.css"
+
+const bodyFont = Manrope({
+  subsets: ["latin"],
+  variable: "--font-body",
+  weight: ["400", "500", "600", "700", "800"],
+})
+
+const displayFont = Space_Grotesk({
+  subsets: ["latin"],
+  variable: "--font-display",
+  weight: ["400", "500", "600", "700"],
+})
 
 export const metadata: Metadata = {
   metadataBase: new URL(getBaseURL()),
@@ -43,8 +56,12 @@ export const metadata: Metadata = {
 
 export default function RootLayout(props: { children: React.ReactNode }) {
   return (
-    <html lang="fr" data-mode="light">
-      <body>
+    <html
+      lang="fr"
+      data-mode="light"
+      className={`${bodyFont.variable} ${displayFont.variable}`}
+    >
+      <body className="font-body text-arc-ink bg-arc-background antialiased">
         <main className="relative">{props.children}</main>
       </body>
     </html>

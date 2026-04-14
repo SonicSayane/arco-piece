@@ -27,7 +27,7 @@ const Thumbnail: React.FC<ThumbnailProps> = ({
   return (
     <Container
       className={clx(
-        "relative w-full overflow-hidden p-4 bg-ui-bg-subtle shadow-elevation-card-rest rounded-large group-hover:shadow-elevation-card-hover transition-shadow ease-in-out duration-150",
+        "relative w-full overflow-hidden p-3 rounded-2xl border border-arc-divider bg-arc-surface shadow-[0_8px_22px_rgba(15,23,42,0.09)] group-hover:shadow-[0_16px_36px_rgba(15,23,42,0.14)] group-hover:-translate-y-1 transition-all ease-in-out duration-200",
         className,
         {
           "aspect-[11/14]": isFeatured,
