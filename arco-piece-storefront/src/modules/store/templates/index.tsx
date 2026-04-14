@@ -82,37 +82,53 @@ const StoreTemplate = async ({
     label: value,
   }))
 
+  const totalProducts = productsResponse.count
+
   return (
-    <div
-      className="flex flex-col small:flex-row small:items-start py-6 content-container"
-      data-testid="category-container"
-    >
-      <RefinementList
-        sortBy={sort}
-        category={category}
-        vehicleBrand={vehicleBrand}
-        model={model}
-        year={year}
-        categoryOptions={categoryOptions}
-        vehicleBrandOptions={vehicleBrandOptions}
-        modelOptions={modelOptions}
-        yearOptions={yearOptions}
-      />
-      <div className="w-full">
-        <div className="mb-8 text-2xl-semi">
-          <h1 data-testid="store-page-title">All products</h1>
+    <div className="content-container py-8 small:py-10" data-testid="category-container">
+      <div className="grid grid-cols-1 small:grid-cols-[280px_1fr] gap-6">
+        <RefinementList
+          sortBy={sort}
+          category={category}
+          vehicleBrand={vehicleBrand}
+          model={model}
+          year={year}
+          categoryOptions={categoryOptions}
+          vehicleBrandOptions={vehicleBrandOptions}
+          modelOptions={modelOptions}
+          yearOptions={yearOptions}
+        />
+
+        <div className="arc-panel rounded-3xl p-5 small:p-8 w-full">
+          <div className="mb-8 flex flex-col small:flex-row small:items-end small:justify-between gap-2">
+            <div>
+              <p className="font-body text-xs uppercase tracking-[0.15em] text-[var(--arc-accent)]">
+                Catalogue
+              </p>
+              <h1
+                className="font-display mt-2 text-3xl small:text-4xl text-arc-ink"
+                data-testid="store-page-title"
+              >
+                Toutes les pieces
+              </h1>
+            </div>
+            <p className="font-body text-sm text-arc-muted">
+              {totalProducts} produit{totalProducts > 1 ? "s" : ""}
+            </p>
+          </div>
+
+          <Suspense fallback={<SkeletonProductGrid />}>
+            <PaginatedProducts
+              sortBy={sort}
+              page={pageNumber}
+              categoryId={category}
+              vehicleBrand={vehicleBrand}
+              model={model}
+              year={year}
+              countryCode={countryCode}
+            />
+          </Suspense>
         </div>
-        <Suspense fallback={<SkeletonProductGrid />}>
-          <PaginatedProducts
-            sortBy={sort}
-            page={pageNumber}
-            categoryId={category}
-            vehicleBrand={vehicleBrand}
-            model={model}
-            year={year}
-            countryCode={countryCode}
-          />
-        </Suspense>
       </div>
     </div>
   )

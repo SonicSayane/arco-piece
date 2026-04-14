@@ -20,17 +20,22 @@ const FilterRadioGroup = ({
   "data-testid": dataTestId,
 }: FilterRadioGroupProps) => {
   return (
-    <div className="flex gap-x-3 flex-col gap-y-3">
-      <Text className="txt-compact-small-plus text-ui-fg-muted">{title}</Text>
+    <div className="flex flex-col gap-y-3">
+      <Text className="font-body text-xs uppercase tracking-[0.12em] text-arc-muted">
+        {title}
+      </Text>
       <RadioGroup data-testid={dataTestId} onValueChange={handleChange}>
         {items?.map((i) => (
           <div
             key={i.value}
-            className={clx("flex gap-x-2 items-center", {
-              "ml-[-23px]": i.value === value,
+            className={clx("flex gap-x-2 items-center text-sm", {
+              "text-arc-ink": i.value === value,
+              "text-arc-muted": i.value !== value,
             })}
           >
-            {i.value === value && <EllipseMiniSolid />}
+            {i.value === value && (
+              <EllipseMiniSolid className="text-[var(--arc-accent)]" />
+            )}
             <RadioGroup.Item
               checked={i.value === value}
               className="hidden peer"
@@ -40,9 +45,10 @@ const FilterRadioGroup = ({
             <Label
               htmlFor={i.value}
               className={clx(
-                "!txt-compact-small !transform-none text-ui-fg-subtle hover:cursor-pointer",
+                "!transform-none text-sm hover:cursor-pointer transition-colors",
                 {
-                  "text-ui-fg-base": i.value === value,
+                  "text-arc-ink font-semibold": i.value === value,
+                  "text-arc-muted hover:text-arc-ink": i.value !== value,
                 }
               )}
               data-testid="radio-label"

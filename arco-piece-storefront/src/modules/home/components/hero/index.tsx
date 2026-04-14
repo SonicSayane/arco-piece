@@ -31,12 +31,12 @@ const Hero = () => {
           >
             Explorer le catalogue
           </LocalizedClientLink>
-          <LocalizedClientLink
-            href="/account"
+          <a
+            href="#promos"
             className="inline-flex items-center rounded-full px-6 py-3 border border-arc-divider text-sm font-semibold tracking-wide text-arc-ink bg-arc-surface hover:bg-arc-surface-strong transition"
           >
-            Mon compte
-          </LocalizedClientLink>
+            Voir les promos
+          </a>
         </div>
 
         <ul className="mt-10 grid grid-cols-1 small:grid-cols-3 gap-3 text-sm animate-arc-fade-up animation-delay-300">

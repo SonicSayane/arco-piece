@@ -13,6 +13,33 @@ module.exports = defineConfig({
       cookieSecret: process.env.COOKIE_SECRET || "supersecret",
     }
   },
+  admin: {
+    path: "/app",
+    vite: (config) => {
+      const placeholderTag = '<link rel="icon" href="data:," data-placeholder-favicon />'
+      const faviconTag = '<link rel="icon" type="image/svg+xml" href="/static/arco-piece-svg.svg" />'
+
+      const injectedPlugin = {
+        name: "arco-admin-favicon",
+        transformIndexHtml: (html: string) => {
+          if (html.includes(placeholderTag)) {
+            return html.replace(placeholderTag, faviconTag)
+          }
+
+          if (html.includes("</head>")) {
+            return html.replace("</head>", `  ${faviconTag}\n</head>`)
+          }
+
+          return `${faviconTag}\n${html}`
+        },
+      }
+
+      return {
+        ...config,
+        plugins: [...(config.plugins ?? []), injectedPlugin],
+      }
+    },
+  },
   modules: [
     {
       resolve: "@medusajs/medusa/payment",

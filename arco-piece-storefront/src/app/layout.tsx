@@ -48,6 +48,11 @@ export const metadata: Metadata = {
     description:
       "Arco-Piece - boutique e-commerce de pieces mecaniques (voiture, moto, scooter, quad).",
   },
+  icons: {
+    icon: [{ url: "/arco-piece-svg.svg", type: "image/svg+xml" }],
+    shortcut: ["/arco-piece-svg.svg"],
+    apple: [{ url: "/arco-piece-svg.svg" }],
+  },
   robots: {
     index: true,
     follow: true,

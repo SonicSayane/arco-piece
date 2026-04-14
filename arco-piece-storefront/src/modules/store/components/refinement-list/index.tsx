@@ -64,33 +64,51 @@ const RefinementList = ({
   }
 
   return (
-    <div className="flex small:flex-col gap-12 py-4 mb-8 small:px-0 pl-6 small:min-w-[250px] small:ml-[1.675rem]">
-      <SortProducts sortBy={sortBy} setQueryParams={setQueryParams} data-testid={dataTestId} />
-      <FilterRadioGroup
-        title="Categorie"
-        items={[{ value: "", label: "Toutes" }, ...categoryOptions]}
-        value={category || ""}
-        handleChange={(value: string) => setQueryParams("category", value)}
-      />
-      <FilterRadioGroup
-        title="Marque du vehicule"
-        items={[{ value: "", label: "Toutes" }, ...vehicleBrandOptions]}
-        value={vehicleBrand || ""}
-        handleChange={(value: string) => setQueryParams("vehicle_brand", value)}
-      />
-      <FilterRadioGroup
-        title="Modele"
-        items={[{ value: "", label: "Tous" }, ...modelOptions]}
-        value={model || ""}
-        handleChange={(value: string) => setQueryParams("model", value)}
-      />
-      <FilterRadioGroup
-        title="Annee"
-        items={[{ value: "", label: "Toutes" }, ...yearOptions]}
-        value={year || ""}
-        handleChange={(value: string) => setQueryParams("year", value)}
-      />
-    </div>
+    <aside className="arc-panel rounded-3xl p-5 small:p-6 h-fit small:sticky small:top-24">
+      <p className="font-body text-xs uppercase tracking-[0.15em] text-[var(--arc-accent)] mb-4">
+        Filtres
+      </p>
+
+      <div className="flex flex-col gap-y-5">
+        <SortProducts sortBy={sortBy} setQueryParams={setQueryParams} data-testid={dataTestId} />
+
+        <div className="border-t border-arc-divider pt-4">
+          <FilterRadioGroup
+            title="Categorie"
+            items={[{ value: "", label: "Toutes" }, ...categoryOptions]}
+            value={category || ""}
+            handleChange={(value: string) => setQueryParams("category", value)}
+          />
+        </div>
+
+        <div className="border-t border-arc-divider pt-4">
+          <FilterRadioGroup
+            title="Marque du vehicule"
+            items={[{ value: "", label: "Toutes" }, ...vehicleBrandOptions]}
+            value={vehicleBrand || ""}
+            handleChange={(value: string) => setQueryParams("vehicle_brand", value)}
+          />
+        </div>
+
+        <div className="border-t border-arc-divider pt-4">
+          <FilterRadioGroup
+            title="Modele"
+            items={[{ value: "", label: "Tous" }, ...modelOptions]}
+            value={model || ""}
+            handleChange={(value: string) => setQueryParams("model", value)}
+          />
+        </div>
+
+        <div className="border-t border-arc-divider pt-4">
+          <FilterRadioGroup
+            title="Annee"
+            items={[{ value: "", label: "Toutes" }, ...yearOptions]}
+            value={year || ""}
+            handleChange={(value: string) => setQueryParams("year", value)}
+          />
+        </div>
+      </div>
+    </aside>
   )
 }
 
