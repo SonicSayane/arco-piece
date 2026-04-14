@@ -4,7 +4,6 @@ import { Text, clx } from "@medusajs/ui"
 import Image from "next/image"
 
 import LocalizedClientLink from "@modules/common/components/localized-client-link"
-import MedusaCTA from "@modules/layout/components/medusa-cta"
 
 export default async function Footer() {
   const { collections } = await listCollections({
@@ -150,7 +149,7 @@ export default async function Footer() {
                       href="/account"
                       className="hover:text-[var(--arc-accent)] transition-colors"
                     >
-                      User
+                      Profil
                     </LocalizedClientLink>
                   </li>
                 </ul>
@@ -161,7 +160,7 @@ export default async function Footer() {
             <Text className="txt-compact-small">
               © {new Date().getFullYear()} Arco-Piece. Tous droits reserves.
             </Text>
-            <MedusaCTA />
+            <Text className="txt-compact-small">Service client: support@arco-piece.com</Text>
           </div>
         </div>
       </div>

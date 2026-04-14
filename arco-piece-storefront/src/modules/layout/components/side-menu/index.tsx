@@ -16,21 +16,19 @@ type SideMenuProps = {
   regions: HttpTypes.StoreRegion[] | null
   locales: Locale[] | null
   currentLocale: string | null
-  accountLabel?: string
 }
 
 const SideMenu = ({
   regions,
   locales,
   currentLocale,
-  accountLabel,
 }: SideMenuProps) => {
   const countryToggleState = useToggleState()
   const languageToggleState = useToggleState()
   const sideMenuItems = [
     { key: "home", label: "Accueil", href: "/" },
     { key: "store", label: "Catalogue", href: "/store" },
-    { key: "account", label: accountLabel || "Compte", href: "/account" },
+    { key: "account", label: "Profil", href: "/account" },
     { key: "cart", label: "Panier", href: "/cart" },
   ]
 

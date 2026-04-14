@@ -3,8 +3,8 @@ import { Metadata } from "next"
 import LoginTemplate from "@modules/account/templates/login-template"
 
 export const metadata: Metadata = {
-  title: "Sign in",
-  description: "Sign in to your Arco-Piece account.",
+  title: "Connexion",
+  description: "Connectez-vous a votre compte Arco-Piece.",
 }
 
 export default function Login() {

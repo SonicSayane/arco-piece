@@ -3,6 +3,7 @@ import { LOGIN_VIEW } from "@modules/account/templates/login-template"
 import ErrorMessage from "@modules/checkout/components/error-message"
 import { SubmitButton } from "@modules/checkout/components/submit-button"
 import Input from "@modules/common/components/input"
+import Image from "next/image"
 import { useActionState } from "react"
 
 type Props = {
@@ -14,13 +15,29 @@ const Login = ({ setCurrentView }: Props) => {
 
   return (
     <div
-      className="max-w-sm w-full flex flex-col items-center"
+      className="max-w-md w-full rounded-3xl border border-arc-divider bg-arc-surface px-6 py-8 small:px-8"
       data-testid="login-page"
     >
-      <h1 className="text-large-semi uppercase mb-6">Welcome back</h1>
-      <p className="text-center text-base-regular text-ui-fg-base mb-8">
-        Sign in to access an enhanced shopping experience.
+      <div className="mb-6 flex items-center justify-center gap-2">
+        <Image
+          src="/arco-piece-svg.svg"
+          alt="Arco-Piece"
+          width={34}
+          height={34}
+          className="h-8 w-8 object-contain"
+        />
+        <span className="font-display text-xl tracking-[-0.02em] text-arc-ink">
+          Arco-Piece
+        </span>
+      </div>
+
+      <h1 className="text-center font-display text-2xl text-arc-ink">
+        Bienvenue sur Arco-Piece
+      </h1>
+      <p className="mt-2 text-center text-sm text-arc-muted mb-8">
+        Connectez-vous pour suivre vos commandes et accelerer vos achats.
       </p>
+
       <form className="w-full" action={formAction}>
         <div className="flex flex-col w-full gap-y-2">
           <Input
@@ -42,18 +59,19 @@ const Login = ({ setCurrentView }: Props) => {
           />
         </div>
         <ErrorMessage error={message} data-testid="login-error-message" />
-        <SubmitButton data-testid="sign-in-button" className="w-full mt-6">
-          Sign in
+        <SubmitButton data-testid="sign-in-button" className="w-full mt-6 h-11">
+          Se connecter
         </SubmitButton>
       </form>
-      <span className="text-center text-ui-fg-base text-small-regular mt-6">
-        Not a member?{" "}
+
+      <span className="text-center text-arc-muted text-small-regular mt-6">
+        Pas encore de compte ?{" "}
         <button
           onClick={() => setCurrentView(LOGIN_VIEW.REGISTER)}
-          className="underline"
+          className="underline text-arc-ink"
           data-testid="register-button"
         >
-          Join us
+          Creer un compte
         </button>
         .
       </span>

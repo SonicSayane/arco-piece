@@ -39,7 +39,6 @@ export default async function Nav() {
                 regions={regions}
                 locales={locales}
                 currentLocale={currentLocale}
-                accountLabel={accountDisplayName}
               />
             </div>
           </div>
