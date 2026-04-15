@@ -108,19 +108,39 @@ const SHIPPING_METHODS = [
   },
 ] as const;
 
-const XOF_PER_EUR_CENT = 6.56;
+const XOF_PER_EUR = 655.957;
+const DEFAULT_USD_PER_EUR = 1.1793;
+
+const parsePositiveNumber = (value: string | undefined, fallback: number) => {
+  if (!value) {
+    return fallback;
+  }
+
+  const parsed = Number(value);
+
+  if (!Number.isFinite(parsed) || parsed <= 0) {
+    return fallback;
+  }
+
+  return parsed;
+};
+
+const USD_PER_EUR = parsePositiveNumber(
+  process.env.MARKET_USD_PER_EUR,
+  DEFAULT_USD_PER_EUR
+);
 
 const toXofAmount = (eurAmount: number) =>
-  Math.max(1, Math.round(eurAmount * XOF_PER_EUR_CENT));
+  Math.max(1, Math.round(eurAmount * XOF_PER_EUR));
 
 const toEurAmountFromXof = (xofAmount: number) =>
-  Math.max(1, Math.round(xofAmount / XOF_PER_EUR_CENT));
+  Math.max(1, Math.round(xofAmount / XOF_PER_EUR));
 
 const toUsdAmountFromEur = (eurAmount: number) =>
-  Math.max(1, Math.round(eurAmount * 1.5));
+  Math.max(1, Math.round(eurAmount * USD_PER_EUR));
 
 const toEurAmountFromUsd = (usdAmount: number) =>
-  Math.max(1, Math.round(usdAmount / 1.5));
+  Math.max(1, Math.round(usdAmount / USD_PER_EUR));
 
 const chunk = <T>(items: T[], size: number) => {
   const result: T[][] = [];
@@ -419,6 +439,10 @@ export default async function setupWestAfricaMarket({ container }: ExecArgs) {
   const shippingOptionsToUpdate: any[] = [];
 
   for (const method of SHIPPING_METHODS) {
+    const expectedEurAmount = method.amount;
+    const expectedUsdAmount = toUsdAmountFromEur(expectedEurAmount);
+    const expectedXofAmount = toXofAmount(expectedEurAmount);
+
     const existingOption = optionsInPrimaryServiceZone.find(
       (option) => option.name.trim().toLowerCase() === method.name.toLowerCase()
     );
@@ -434,15 +458,15 @@ export default async function setupWestAfricaMarket({ container }: ExecArgs) {
         prices: [
           {
             currency_code: "usd",
-            amount: method.amount,
+            amount: expectedUsdAmount,
           },
           {
             currency_code: "eur",
-            amount: method.amount,
+            amount: expectedEurAmount,
           },
           {
             currency_code: "xof",
-            amount: toXofAmount(method.amount),
+            amount: expectedXofAmount,
           },
         ],
         rules: [
@@ -466,6 +490,17 @@ export default async function setupWestAfricaMarket({ container }: ExecArgs) {
       .map((price) => price.currency_code?.toLowerCase())
       .filter((currency): currency is string => Boolean(currency));
 
+    const priceByCurrency = new Map<string, number>();
+
+    for (const price of existingOption.prices ?? []) {
+      const currencyCode = price.currency_code?.toLowerCase();
+      if (!currencyCode || typeof price.amount !== "number") {
+        continue;
+      }
+
+      priceByCurrency.set(currencyCode, price.amount);
+    }
+
     const expectedCurrencies = ["eur", "usd", "xof"];
     const hasAllExpectedCurrencies = expectedCurrencies.every((currency) => {
       return existingCurrencies.includes(currency);
@@ -473,21 +508,29 @@ export default async function setupWestAfricaMarket({ container }: ExecArgs) {
     const hasDuplicateCurrencies =
       new Set(existingCurrencies).size !== existingCurrencies.length;
 
-    if (!hasAllExpectedCurrencies || hasDuplicateCurrencies) {
+    const hasUnexpectedAmounts =
+      (typeof priceByCurrency.get("eur") === "number" &&
+        priceByCurrency.get("eur") !== expectedEurAmount) ||
+      (typeof priceByCurrency.get("usd") === "number" &&
+        priceByCurrency.get("usd") !== expectedUsdAmount) ||
+      (typeof priceByCurrency.get("xof") === "number" &&
+        priceByCurrency.get("xof") !== expectedXofAmount);
+
+    if (!hasAllExpectedCurrencies || hasDuplicateCurrencies || hasUnexpectedAmounts) {
       shippingOptionsToUpdate.push({
         id: existingOption.id,
         prices: [
           {
             currency_code: "usd",
-            amount: method.amount,
+            amount: expectedUsdAmount,
           },
           {
             currency_code: "eur",
-            amount: method.amount,
+            amount: expectedEurAmount,
           },
           {
             currency_code: "xof",
-            amount: toXofAmount(method.amount),
+            amount: expectedXofAmount,
           },
         ],
       });
@@ -522,7 +565,7 @@ export default async function setupWestAfricaMarket({ container }: ExecArgs) {
   });
 
   const variantUpdates = productVariantsData
-    .filter((variant) => {
+    .map((variant) => {
       const currencies = (variant.prices ?? [])
         .map((price) => price.currency_code?.toLowerCase())
         .filter((currency): currency is string => Boolean(currency));
@@ -530,12 +573,10 @@ export default async function setupWestAfricaMarket({ container }: ExecArgs) {
       const hasAllExpectedCurrencies = ["eur", "usd", "xof"].every((currency) => {
         return currencies.includes(currency);
       });
+
       const hasDuplicateCurrencies =
         new Set(currencies).size !== currencies.length;
 
-      return !hasAllExpectedCurrencies || hasDuplicateCurrencies;
-    })
-    .map((variant) => {
       const eurPriceAmount = (variant.prices ?? []).find(
         (price) => price.currency_code?.toLowerCase() === "eur"
       )?.amount;
@@ -557,15 +598,19 @@ export default async function setupWestAfricaMarket({ container }: ExecArgs) {
               ? toEurAmountFromXof(xofPriceAmount)
               : 10;
 
-      const resolvedUsdAmount =
-        typeof usdPriceAmount === "number"
-          ? usdPriceAmount
-          : toUsdAmountFromEur(resolvedEurAmount);
+      const expectedUsdAmount = toUsdAmountFromEur(resolvedEurAmount);
+      const expectedXofAmount = toXofAmount(resolvedEurAmount);
 
-      const resolvedXofAmount =
-        typeof xofPriceAmount === "number"
-          ? xofPriceAmount
-          : toXofAmount(resolvedEurAmount);
+      const hasUnexpectedAmounts =
+        (typeof usdPriceAmount === "number" && usdPriceAmount !== expectedUsdAmount) ||
+        (typeof xofPriceAmount === "number" && xofPriceAmount !== expectedXofAmount);
+
+      const shouldUpdate =
+        !hasAllExpectedCurrencies || hasDuplicateCurrencies || hasUnexpectedAmounts;
+
+      if (!shouldUpdate) {
+        return null;
+      }
 
       return {
         id: variant.id,
@@ -576,15 +621,23 @@ export default async function setupWestAfricaMarket({ container }: ExecArgs) {
           },
           {
             currency_code: "usd",
-            amount: resolvedUsdAmount,
+            amount: expectedUsdAmount,
           },
           {
             currency_code: "xof",
-            amount: resolvedXofAmount,
+            amount: expectedXofAmount,
           },
         ],
       };
-    });
+    })
+    .filter(
+      (
+        variant
+      ): variant is {
+        id: string;
+        prices: Array<{ currency_code: string; amount: number }>;
+      } => Boolean(variant)
+    );
 
   if (variantUpdates.length) {
     for (const updates of chunk(variantUpdates, 50)) {

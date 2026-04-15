@@ -16,6 +16,18 @@ import {
   setAuthToken,
 } from "./cookies"
 
+const getErrorStatus = (error: any): number | undefined => {
+  if (typeof error?.status === "number") {
+    return error.status
+  }
+
+  if (typeof error?.response?.status === "number") {
+    return error.response.status
+  }
+
+  return undefined
+}
+
 const getCustomerDisplayName = (customer: {
   first_name?: string | null
   last_name?: string | null
@@ -112,10 +124,18 @@ export async function signup(_currentState: unknown, formData: FormData) {
     const customerCacheTag = await getCacheTag("customers")
     revalidateTag(customerCacheTag)
 
-    await transferCart()
+    try {
+      await transferCart()
+    } catch {
+      // Login/signup should not fail when cart transfer is stale/invalid.
+    }
 
     return createdCustomer
   } catch (error: any) {
+    if (getErrorStatus(error) === 401) {
+      return "Authentification impossible. Verifiez vos informations."
+    }
+
     return error.toString()
   }
 }
@@ -156,13 +176,17 @@ export async function login(_currentState: unknown, formData: FormData) {
         revalidateTag(customerCacheTag)
       })
   } catch (error: any) {
+    if (getErrorStatus(error) === 401) {
+      return "Email ou mot de passe invalide."
+    }
+
     return error.toString()
   }
 
   try {
     await transferCart()
-  } catch (error: any) {
-    return error.toString()
+  } catch {
+    // Best effort only. User is already authenticated.
   }
 }
 
@@ -192,7 +216,24 @@ export async function transferCart() {
 
   const headers = await getAuthHeaders()
 
-  await sdk.store.cart.transferCart(cartId, {}, headers)
+  if (!("authorization" in headers)) {
+    return
+  }
+
+  try {
+    await sdk.store.cart.transferCart(cartId, {}, headers)
+  } catch (error: any) {
+    const status = getErrorStatus(error)
+
+    if (status === 401 || status === 404 || status === 409) {
+      await removeCartId()
+      const cartCacheTag = await getCacheTag("carts")
+      revalidateTag(cartCacheTag)
+      return
+    }
+
+    throw error
+  }
 
   const cartCacheTag = await getCacheTag("carts")
   revalidateTag(cartCacheTag)
