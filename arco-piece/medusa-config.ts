@@ -15,7 +15,7 @@ module.exports = defineConfig({
   },
   admin: {
     path: "/app",
-    vite: (config) => {
+    vite: () => {
       const placeholderTag = '<link rel="icon" href="data:," data-placeholder-favicon />'
       const faviconTag = '<link rel="icon" type="image/svg+xml" href="/static/arco-piece-svg.svg" />'
 
@@ -35,8 +35,7 @@ module.exports = defineConfig({
       }
 
       return {
-        ...config,
-        plugins: [...(config.plugins ?? []), injectedPlugin],
+        plugins: [injectedPlugin],
       }
     },
   },

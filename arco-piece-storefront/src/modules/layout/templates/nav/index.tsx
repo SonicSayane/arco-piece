@@ -4,6 +4,7 @@ import { retrieveCustomer } from "@lib/data/customer"
 import { listRegions } from "@lib/data/regions"
 import { listLocales } from "@lib/data/locales"
 import { getLocale } from "@lib/data/locale-actions"
+import { getCustomerName } from "@lib/data/cookies"
 import { StoreRegion } from "@medusajs/types"
 import LocalizedClientLink from "@modules/common/components/localized-client-link"
 import CartButton from "@modules/layout/components/cart-button"
@@ -11,16 +12,19 @@ import SideMenu from "@modules/layout/components/side-menu"
 import Image from "next/image"
 
 export default async function Nav() {
-  const [regions, locales, currentLocale, customer] = await Promise.all([
+  const [regions, locales, currentLocale, customer, savedCustomerName] =
+    await Promise.all([
     listRegions().then((regions: StoreRegion[]) => regions),
     listLocales(),
     getLocale(),
     retrieveCustomer().catch(() => null),
+    getCustomerName().catch(() => undefined),
   ])
 
   const accountDisplayName =
     `${customer?.first_name ?? ""} ${customer?.last_name ?? ""}`.trim() ||
     customer?.email?.split("@")[0] ||
+    savedCustomerName ||
     "Compte"
 
   const userInitials = `${customer?.first_name?.[0] ?? ""}${

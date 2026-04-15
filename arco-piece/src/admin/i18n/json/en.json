@@ -1,0 +1,12 @@
+{
+  "login": {
+    "title": "Arco-Piece Administration",
+    "hint": "Sign in to your Arco-Piece admin account"
+  },
+  "invite": {
+    "title": "Complete your Arco-Piece account",
+    "hint": "Create your password to access the admin dashboard",
+    "success": "Your account is ready.",
+    "successHint": "You can now sign in to Arco-Piece admin."
+  }
+}

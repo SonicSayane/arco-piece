@@ -7,13 +7,26 @@ import { revalidateTag } from "next/cache"
 import { redirect } from "next/navigation"
 import {
   getAuthHeaders,
-  getCacheOptions,
   getCacheTag,
   getCartId,
   removeAuthToken,
   removeCartId,
+  removeCustomerName,
+  setCustomerName,
   setAuthToken,
 } from "./cookies"
+
+const getCustomerDisplayName = (customer: {
+  first_name?: string | null
+  last_name?: string | null
+  email?: string | null
+}) => {
+  return (
+    `${customer.first_name ?? ""} ${customer.last_name ?? ""}`.trim() ||
+    customer.email?.split("@")[0] ||
+    "Compte"
+  )
+}
 
 export const retrieveCustomer =
   async (): Promise<HttpTypes.StoreCustomer | null> => {
@@ -27,10 +40,6 @@ export const retrieveCustomer =
       ...authHeaders,
     }
 
-    const next = {
-      ...(await getCacheOptions("customers")),
-    }
-
     return await sdk.client
       .fetch<{ customer: HttpTypes.StoreCustomer }>(`/store/customers/me`, {
         method: "GET",
@@ -38,8 +47,7 @@ export const retrieveCustomer =
           fields: "*orders",
         },
         headers,
-        next,
-        cache: "force-cache",
+        cache: "no-store",
       })
       .then(({ customer }) => customer)
       .catch(() => null)
@@ -54,6 +62,10 @@ export const updateCustomer = async (body: HttpTypes.StoreUpdateCustomer) => {
     .update(body, {}, headers)
     .then(({ customer }) => customer)
     .catch(medusaError)
+
+  if (updateRes) {
+    await setCustomerName(getCustomerDisplayName(updateRes))
+  }
 
   const cacheTag = await getCacheTag("customers")
   revalidateTag(cacheTag)
@@ -88,6 +100,8 @@ export async function signup(_currentState: unknown, formData: FormData) {
       headers
     )
 
+    await setCustomerName(getCustomerDisplayName(createdCustomer))
+
     const loginToken = await sdk.auth.login("customer", "emailpass", {
       email: customerForm.email,
       password,
@@ -109,12 +123,35 @@ export async function signup(_currentState: unknown, formData: FormData) {
 export async function login(_currentState: unknown, formData: FormData) {
   const email = formData.get("email") as string
   const password = formData.get("password") as string
+  const emailPrefix = email?.split("@")[0] || "Compte"
 
   try {
     await sdk.auth
       .login("customer", "emailpass", { email, password })
       .then(async (token) => {
         await setAuthToken(token as string)
+        await setCustomerName(emailPrefix)
+
+        const headers = {
+          ...(await getAuthHeaders()),
+        }
+
+        if ("authorization" in headers) {
+          await sdk.client
+            .fetch<{ customer: HttpTypes.StoreCustomer }>(
+              `/store/customers/me`,
+              {
+                method: "GET",
+                headers,
+                cache: "no-store",
+              }
+            )
+            .then(async ({ customer }) => {
+              await setCustomerName(getCustomerDisplayName(customer))
+            })
+            .catch(() => null)
+        }
+
         const customerCacheTag = await getCacheTag("customers")
         revalidateTag(customerCacheTag)
       })
@@ -133,6 +170,7 @@ export async function signout(countryCode: string) {
   await sdk.auth.logout()
 
   await removeAuthToken()
+  await removeCustomerName()
 
   const customerCacheTag = await getCacheTag("customers")
   revalidateTag(customerCacheTag)
