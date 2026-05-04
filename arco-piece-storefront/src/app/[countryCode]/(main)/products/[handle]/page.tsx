@@ -2,8 +2,10 @@ import { Metadata } from "next"
 import { notFound } from "next/navigation"
 import { listAllProducts, listProducts } from "@lib/data/products"
 import { getRegion, listRegions } from "@lib/data/regions"
+import ProductJsonLd from "@modules/products/components/product-jsonld"
 import ProductTemplate from "@modules/products/templates"
 import { HttpTypes } from "@medusajs/types"
+import { getBaseURL } from "@lib/util/env"
 
 type Props = {
   params: Promise<{ countryCode: string; handle: string }>
@@ -112,25 +114,39 @@ export async function generateMetadata(props: Props): Promise<Metadata> {
 
   const title = `${product.title} | Arco-Piece`
   const canonicalPath = `/${params.countryCode}/products/${handle}`
+  const ogImages = product.thumbnail
+    ? [{ url: product.thumbnail, alt: product.title }]
+    : []
+  const tagKeywords = (product.tags ?? [])
+    .map((t) => t.value)
+    .filter((value): value is string => Boolean(value))
 
   return {
     title,
     description: description || product.title,
+    keywords: [
+      product.title,
+      ...(product.collection?.title ? [product.collection.title] : []),
+      ...tagKeywords,
+      ...(oem ? [oem] : []),
+    ],
     alternates: {
       canonical: canonicalPath,
     },
     openGraph: {
       type: "website",
+      siteName: "Arco-Piece",
+      locale: params.countryCode === "fr" ? "fr_FR" : "fr",
       title,
       description: description || product.title,
       url: canonicalPath,
-      images: product.thumbnail ? [product.thumbnail] : [],
+      images: ogImages,
     },
     twitter: {
       card: "summary_large_image",
       title,
       description: description || product.title,
-      images: product.thumbnail ? [product.thumbnail] : [],
+      images: ogImages.map((image) => image.url),
     },
   }
 }
@@ -156,13 +172,17 @@ export default async function ProductPage(props: Props) {
   }
 
   const images = getImagesForVariant(pricedProduct, selectedVariantId) ?? []
+  const productUrl = `${getBaseURL()}/${params.countryCode}/products/${params.handle}`
 
   return (
-    <ProductTemplate
-      product={pricedProduct}
-      region={region}
-      countryCode={params.countryCode}
-      images={images}
-    />
+    <>
+      <ProductJsonLd product={pricedProduct} url={productUrl} />
+      <ProductTemplate
+        product={pricedProduct}
+        region={region}
+        countryCode={params.countryCode}
+        images={images}
+      />
+    </>
   )
 }
