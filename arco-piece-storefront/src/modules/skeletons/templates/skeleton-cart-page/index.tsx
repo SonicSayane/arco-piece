@@ -7,11 +7,11 @@ import SkeletonOrderSummary from "@modules/skeletons/components/skeleton-order-s
 
 const SkeletonCartPage = () => {
   return (
-    <div className="py-12">
+    <div className="py-8 small:py-12 pb-24 small:pb-16">
       <div className="content-container">
-        <div className="grid grid-cols-1 small:grid-cols-[1fr_360px] gap-x-40">
-          <div className="flex flex-col bg-white p-6 gap-y-6">
-            <div className="bg-white flex items-start justify-between">
+        <div className="grid grid-cols-1 small:grid-cols-[1fr_360px] gap-6 small:gap-10">
+          <div className="flex flex-col rounded-3xl border border-arc-divider bg-arc-surface p-5 small:p-8 gap-y-6">
+            <div className="flex items-start justify-between">
               <div className="flex flex-col gap-y-2">
                 <div className="w-60 h-8 bg-gray-200 animate-pulse" />
                 <div className="w-48 h-6 bg-gray-200 animate-pulse" />
