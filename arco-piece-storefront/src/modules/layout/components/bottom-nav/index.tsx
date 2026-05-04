@@ -6,9 +6,16 @@ import { usePathname } from "next/navigation"
 
 type Item = {
   href: string
-  label: string
+  labelKey: "home" | "catalog" | "cart" | "account"
   matches: (pathname: string) => boolean
   icon: React.ReactNode
+}
+
+type Labels = {
+  home: string
+  catalog: string
+  cart: string
+  account: string
 }
 
 const ICON_PROPS = {
@@ -24,7 +31,7 @@ const ICON_PROPS = {
 const ITEMS: Item[] = [
   {
     href: "/",
-    label: "Accueil",
+    labelKey: "home",
     matches: (path) => /^\/[a-z]{2}\/?$/.test(path),
     icon: (
       <svg viewBox="0 0 24 24" {...ICON_PROPS}>
@@ -34,7 +41,7 @@ const ITEMS: Item[] = [
   },
   {
     href: "/store",
-    label: "Catalogue",
+    labelKey: "catalog",
     matches: (path) =>
       /^\/[a-z]{2}\/(store|categories|collections|products)/.test(path),
     icon: (
@@ -46,7 +53,7 @@ const ITEMS: Item[] = [
   },
   {
     href: "/cart",
-    label: "Panier",
+    labelKey: "cart",
     matches: (path) => /^\/[a-z]{2}\/cart/.test(path),
     icon: (
       <svg viewBox="0 0 24 24" {...ICON_PROPS}>
@@ -58,7 +65,7 @@ const ITEMS: Item[] = [
   },
   {
     href: "/account",
-    label: "Compte",
+    labelKey: "account",
     matches: (path) => /^\/[a-z]{2}\/account/.test(path),
     icon: (
       <svg viewBox="0 0 24 24" {...ICON_PROPS}>
@@ -69,7 +76,14 @@ const ITEMS: Item[] = [
   },
 ]
 
-const BottomNav = () => {
+const DEFAULT_LABELS: Labels = {
+  home: "Accueil",
+  catalog: "Catalogue",
+  cart: "Panier",
+  account: "Compte",
+}
+
+const BottomNav = ({ labels = DEFAULT_LABELS }: { labels?: Labels }) => {
   const pathname = usePathname() ?? ""
 
   return (
@@ -93,7 +107,7 @@ const BottomNav = () => {
                 aria-current={active ? "page" : undefined}
               >
                 <span aria-hidden="true">{item.icon}</span>
-                <span>{item.label}</span>
+                <span>{labels[item.labelKey]}</span>
               </LocalizedClientLink>
             </li>
           )

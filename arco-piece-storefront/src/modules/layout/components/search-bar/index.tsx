@@ -33,7 +33,21 @@ const SearchIcon = () => (
   </svg>
 )
 
-const SearchBar = () => {
+type SearchLabels = {
+  searchPlaceholder: string
+  searchAll: string
+  searchEmpty: string
+}
+
+const DEFAULT_LABELS: SearchLabels = {
+  searchPlaceholder: "Rechercher une pièce, une référence OEM…",
+  searchAll: "Voir tous les résultats →",
+  searchEmpty: "Aucun résultat pour",
+}
+
+const SearchBar = ({
+  labels = DEFAULT_LABELS,
+}: { labels?: SearchLabels } = {}) => {
   const router = useRouter()
   const params = useParams<{ countryCode?: string }>()
   const countryCode =
@@ -116,7 +130,7 @@ const SearchBar = () => {
               setOpen(true)
             }}
             onFocus={() => setOpen(true)}
-            placeholder="Rechercher une pièce, une référence OEM…"
+            placeholder={labels.searchPlaceholder}
             className="flex-1 bg-transparent text-sm placeholder:text-arc-muted focus:outline-none"
             autoComplete="off"
           />
@@ -162,13 +176,14 @@ const SearchBar = () => {
                   onClick={() => submit()}
                   className="w-full px-3 py-2.5 text-left text-xs font-semibold uppercase tracking-wide text-[var(--arc-accent)] hover:bg-arc-surface-strong transition-colors"
                 >
-                  Voir tous les résultats →
+                  {labels.searchAll}
                 </button>
               </li>
             </ul>
           ) : (
             <p className="px-3 py-3 text-sm text-arc-muted">
-              Aucun résultat pour <span className="font-semibold">{query}</span>.
+              {labels.searchEmpty}{" "}
+              <span className="font-semibold">{query}</span>.
             </p>
           )}
         </div>

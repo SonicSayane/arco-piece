@@ -5,6 +5,7 @@ import Hero from "@modules/home/components/hero"
 import TrustBanner from "@modules/home/components/trust-banner"
 import { listCollections } from "@lib/data/collections"
 import { getRegion } from "@lib/data/regions"
+import { getDict } from "@lib/i18n"
 import { Heading, Text } from "@medusajs/ui"
 import ArcCard from "@modules/common/components/arc-card"
 import LocalizedClientLink from "@modules/common/components/localized-client-link"
@@ -57,11 +58,13 @@ export default async function Home(props: {
 
   const { countryCode } = params
 
-  const region = await getRegion(countryCode)
+  const [region, collectionsResp, dict] = await Promise.all([
+    getRegion(countryCode),
+    listCollections({ fields: "id, handle, title" }),
+    getDict(),
+  ])
 
-  const { collections } = await listCollections({
-    fields: "id, handle, title",
-  })
+  const { collections } = collectionsResp
 
   if (!collections || !region) {
     return null
@@ -71,7 +74,7 @@ export default async function Home(props: {
     <>
       <Hero />
 
-      <TrustBanner />
+      <TrustBanner copy={dict.trust} />
 
       <section id="promos" className="content-container pb-10 small:pb-12">
         <div className="grid grid-cols-1 medium:grid-cols-3 gap-4">

@@ -1,9 +1,34 @@
 import { Text } from "@medusajs/ui"
 import * as React from "react"
 
+type TrustCopy = {
+  payment: { title: string; description: string }
+  shipping: { title: string; description: string }
+  support: { title: string; description: string }
+  compatibility: { title: string; description: string }
+}
+
+const DEFAULT_COPY: TrustCopy = {
+  payment: {
+    title: "Paiement sécurisé",
+    description: "Stripe — Visa, Mastercard, Mobile Money",
+  },
+  shipping: {
+    title: "Livraison UEMOA",
+    description: "Couverture des 8 pays + international",
+  },
+  support: {
+    title: "Support en français",
+    description: "Notre équipe répond en moins de 24h",
+  },
+  compatibility: {
+    title: "Pièces compatibles",
+    description: "Recherche par marque, modèle, année",
+  },
+}
+
 type TrustItem = {
-  title: string
-  description: string
+  copyKey: keyof TrustCopy
   icon: React.ReactNode
 }
 
@@ -18,8 +43,7 @@ const STROKE_PROPS = {
 
 const TRUST_ITEMS: TrustItem[] = [
   {
-    title: "Paiement sécurisé",
-    description: "Stripe — Visa, Mastercard, Mobile Money",
+    copyKey: "payment",
     icon: (
       <svg viewBox="0 0 24 24" className={ICON_CLASS} {...STROKE_PROPS}>
         <rect x="3" y="6" width="18" height="13" rx="2" />
@@ -29,8 +53,7 @@ const TRUST_ITEMS: TrustItem[] = [
     ),
   },
   {
-    title: "Livraison UEMOA",
-    description: "Couverture des 8 pays + international",
+    copyKey: "shipping",
     icon: (
       <svg viewBox="0 0 24 24" className={ICON_CLASS} {...STROKE_PROPS}>
         <path d="M3 7h11v9H3z" />
@@ -41,8 +64,7 @@ const TRUST_ITEMS: TrustItem[] = [
     ),
   },
   {
-    title: "Support en français",
-    description: "Notre équipe répond en moins de 24h",
+    copyKey: "support",
     icon: (
       <svg viewBox="0 0 24 24" className={ICON_CLASS} {...STROKE_PROPS}>
         <path d="M21 11.5a8.5 8.5 0 1 1-3.6-6.93" />
@@ -51,8 +73,7 @@ const TRUST_ITEMS: TrustItem[] = [
     ),
   },
   {
-    title: "Pièces compatibles",
-    description: "Recherche par marque, modèle, année",
+    copyKey: "compatibility",
     icon: (
       <svg viewBox="0 0 24 24" className={ICON_CLASS} {...STROKE_PROPS}>
         <circle cx="11" cy="11" r="6.5" />
@@ -62,34 +83,45 @@ const TRUST_ITEMS: TrustItem[] = [
   },
 ]
 
-const TrustBanner = () => {
+type Props = {
+  copy?: TrustCopy
+  ariaLabel?: string
+}
+
+const TrustBanner = ({
+  copy = DEFAULT_COPY,
+  ariaLabel = "Garanties Arco-Piece",
+}: Props) => {
   return (
     <section
-      aria-label="Garanties Arco-Piece"
+      aria-label={ariaLabel}
       className="content-container -mt-2 pb-10 small:pb-12"
     >
       <ul className="grid grid-cols-2 medium:grid-cols-4 gap-3 small:gap-4">
-        {TRUST_ITEMS.map((item) => (
-          <li
-            key={item.title}
-            className="flex items-start gap-3 rounded-2xl border border-arc-divider bg-arc-surface px-4 py-3.5 transition-colors hover:bg-arc-surface-strong"
-          >
-            <span
-              aria-hidden="true"
-              className="mt-0.5 inline-flex h-9 w-9 flex-none items-center justify-center rounded-full bg-arc-surface-strong text-[var(--arc-accent)]"
+        {TRUST_ITEMS.map((item) => {
+          const text = copy[item.copyKey]
+          return (
+            <li
+              key={item.copyKey}
+              className="flex items-start gap-3 rounded-2xl border border-arc-divider bg-arc-surface px-4 py-3.5 transition-colors hover:bg-arc-surface-strong"
             >
-              {item.icon}
-            </span>
-            <div className="min-w-0">
-              <Text className="font-body text-sm font-semibold text-arc-ink">
-                {item.title}
-              </Text>
-              <Text className="font-body mt-0.5 text-xs text-arc-muted truncate">
-                {item.description}
-              </Text>
-            </div>
-          </li>
-        ))}
+              <span
+                aria-hidden="true"
+                className="mt-0.5 inline-flex h-9 w-9 flex-none items-center justify-center rounded-full bg-arc-surface-strong text-[var(--arc-accent)]"
+              >
+                {item.icon}
+              </span>
+              <div className="min-w-0">
+                <Text className="font-body text-sm font-semibold text-arc-ink">
+                  {text.title}
+                </Text>
+                <Text className="font-body mt-0.5 text-xs text-arc-muted truncate">
+                  {text.description}
+                </Text>
+              </div>
+            </li>
+          )
+        })}
       </ul>
     </section>
   )

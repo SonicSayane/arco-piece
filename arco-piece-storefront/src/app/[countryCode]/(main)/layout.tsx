@@ -2,6 +2,7 @@ import { Metadata } from "next"
 
 import { listCartOptions, retrieveCart } from "@lib/data/cart"
 import { retrieveCustomer } from "@lib/data/customer"
+import { getDict } from "@lib/i18n"
 import { getBaseURL } from "@lib/util/env"
 import { StoreCartShippingOption } from "@medusajs/types"
 import BottomNav from "@modules/layout/components/bottom-nav"
@@ -16,8 +17,11 @@ export const metadata: Metadata = {
 }
 
 export default async function PageLayout(props: { children: React.ReactNode }) {
-  const customer = await retrieveCustomer()
-  const cart = await retrieveCart()
+  const [customer, cart, dict] = await Promise.all([
+    retrieveCustomer(),
+    retrieveCart(),
+    getDict(),
+  ])
   let shippingOptions: StoreCartShippingOption[] = []
 
   if (cart) {
@@ -43,7 +47,7 @@ export default async function PageLayout(props: { children: React.ReactNode }) {
       <div className="pb-16 small:pb-0">{props.children}</div>
       <WhatsappCta />
       <Footer />
-      <BottomNav />
+      <BottomNav labels={dict.nav} />
     </>
   )
 }

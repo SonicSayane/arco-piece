@@ -1,8 +1,11 @@
 import ArcButton from "@modules/common/components/arc-button"
 import EmptyState from "@modules/common/components/empty-state"
 import LocalizedClientLink from "@modules/common/components/localized-client-link"
+import { getDict } from "@lib/i18n"
 
-const EmptyCartMessage = () => {
+const EmptyCartMessage = async () => {
+  const dict = await getDict()
+
   return (
     <div data-testid="empty-cart-message">
       <EmptyState
@@ -25,11 +28,11 @@ const EmptyCartMessage = () => {
             <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6" />
           </svg>
         }
-        title="Votre panier est vide"
-        description="Aucun article pour le moment. Parcourez le catalogue pour trouver les pièces qu'il vous faut."
+        title={dict.emptyCart.title}
+        description={dict.emptyCart.description}
         action={
           <LocalizedClientLink href="/store">
-            <ArcButton variant="primary">Explorer le catalogue</ArcButton>
+            <ArcButton variant="primary">{dict.emptyCart.cta}</ArcButton>
           </LocalizedClientLink>
         }
       />
