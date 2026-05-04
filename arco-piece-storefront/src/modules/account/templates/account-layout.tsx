@@ -1,6 +1,6 @@
 import React from "react"
 
-import UnderlineLink from "@modules/common/components/interactive-link"
+import LocalizedClientLink from "@modules/common/components/localized-client-link"
 
 import AccountNav from "../components/account-nav"
 import { HttpTypes } from "@medusajs/types"
@@ -15,25 +15,28 @@ const AccountLayout: React.FC<AccountLayoutProps> = ({
   children,
 }) => {
   return (
-    <div className="flex-1 small:py-12" data-testid="account-page">
-      <div className="flex-1 content-container h-full max-w-5xl mx-auto bg-white flex flex-col">
-        <div className="grid grid-cols-1  small:grid-cols-[240px_1fr] py-12">
+    <div className="flex-1 py-8 small:py-12" data-testid="account-page">
+      <div className="content-container max-w-5xl mx-auto rounded-3xl border border-arc-divider bg-arc-surface flex flex-col">
+        <div className="grid grid-cols-1 small:grid-cols-[240px_1fr] py-8 small:py-12 px-5 small:px-8 gap-6">
           <div>{customer && <AccountNav customer={customer} />}</div>
           <div className="flex-1">{children}</div>
         </div>
-        <div className="flex flex-col small:flex-row items-end justify-between small:border-t border-gray-200 py-12 gap-8">
+        <div className="flex flex-col small:flex-row items-start small:items-center justify-between border-t border-arc-divider px-5 small:px-8 py-6 gap-4">
           <div>
-            <h3 className="text-xl-semi mb-4">Got questions?</h3>
-            <span className="txt-medium">
-              You can find frequently asked questions and answers on our
-              customer service page.
+            <h3 className="font-display text-lg text-arc-ink mb-2">
+              Une question ?
+            </h3>
+            <span className="text-sm text-arc-muted">
+              Retrouvez nos réponses aux questions fréquentes sur la page
+              service client.
             </span>
           </div>
-          <div>
-            <UnderlineLink href="/customer-service">
-              Customer Service
-            </UnderlineLink>
-          </div>
+          <LocalizedClientLink
+            href="/customer-service"
+            className="text-sm font-semibold text-[var(--arc-accent)] underline"
+          >
+            Service client
+          </LocalizedClientLink>
         </div>
       </div>
     </div>

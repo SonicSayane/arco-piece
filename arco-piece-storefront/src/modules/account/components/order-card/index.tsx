@@ -1,6 +1,6 @@
-import { Button } from "@medusajs/ui"
 import { useMemo } from "react"
 
+import ArcButton from "@modules/common/components/arc-button"
 import Thumbnail from "@modules/products/components/thumbnail"
 import LocalizedClientLink from "@modules/common/components/localized-client-link"
 import { convertToLocale } from "@lib/util/money"
@@ -23,14 +23,28 @@ const OrderCard = ({ order }: OrderCardProps) => {
     return order.items?.length ?? 0
   }, [order])
 
+  const formattedDate = useMemo(
+    () =>
+      new Date(order.created_at).toLocaleDateString("fr-FR", {
+        day: "2-digit",
+        month: "long",
+        year: "numeric",
+      }),
+    [order]
+  )
+
   return (
-    <div className="bg-white flex flex-col" data-testid="order-card">
-      <div className="uppercase text-large-semi mb-1">
-        #<span data-testid="order-display-id">{order.display_id}</span>
+    <div
+      className="rounded-2xl border border-arc-divider bg-arc-surface p-5 small:p-6 flex flex-col"
+      data-testid="order-card"
+    >
+      <div className="font-display text-lg text-arc-ink mb-1">
+        Commande #
+        <span data-testid="order-display-id">{order.display_id}</span>
       </div>
-      <div className="flex items-center divide-x divide-gray-200 text-small-regular text-ui-fg-base">
+      <div className="flex items-center divide-x divide-arc-divider text-sm text-arc-muted">
         <span className="pr-2" data-testid="order-created-at">
-          {new Date(order.created_at).toDateString()}
+          {formattedDate}
         </span>
         <span className="px-2" data-testid="order-amount">
           {convertToLocale({
@@ -39,7 +53,7 @@ const OrderCard = ({ order }: OrderCardProps) => {
           })}
         </span>
         <span className="pl-2">{`${numberOfLines} ${
-          numberOfLines > 1 ? "items" : "item"
+          numberOfLines > 1 ? "articles" : "article"
         }`}</span>
       </div>
       <div className="grid grid-cols-2 small:grid-cols-4 gap-4 my-4">
@@ -51,11 +65,8 @@ const OrderCard = ({ order }: OrderCardProps) => {
               data-testid="order-item"
             >
               <Thumbnail thumbnail={i.thumbnail} images={[]} size="full" />
-              <div className="flex items-center text-small-regular text-ui-fg-base">
-                <span
-                  className="text-ui-fg-base font-semibold"
-                  data-testid="item-title"
-                >
+              <div className="flex items-center text-sm text-arc-ink">
+                <span className="font-semibold truncate" data-testid="item-title">
                   {i.title}
                 </span>
                 <span className="ml-2">x</span>
@@ -66,18 +77,18 @@ const OrderCard = ({ order }: OrderCardProps) => {
         })}
         {numberOfProducts > 4 && (
           <div className="w-full h-full flex flex-col items-center justify-center">
-            <span className="text-small-regular text-ui-fg-base">
+            <span className="text-sm text-arc-muted">
               + {numberOfLines - 4}
             </span>
-            <span className="text-small-regular text-ui-fg-base">more</span>
+            <span className="text-sm text-arc-muted">de plus</span>
           </div>
         )}
       </div>
       <div className="flex justify-end">
         <LocalizedClientLink href={`/account/orders/details/${order.id}`}>
-          <Button data-testid="order-details-link" variant="secondary">
-            See details
-          </Button>
+          <ArcButton variant="secondary" data-testid="order-details-link">
+            Voir les détails
+          </ArcButton>
         </LocalizedClientLink>
       </div>
     </div>
