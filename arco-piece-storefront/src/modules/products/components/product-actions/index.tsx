@@ -3,7 +3,7 @@
 import { addToCart } from "@lib/data/cart"
 import { useIntersection } from "@lib/hooks/use-in-view"
 import { HttpTypes } from "@medusajs/types"
-import { Button } from "@medusajs/ui"
+import ArcButton from "@modules/common/components/arc-button"
 import Divider from "@modules/common/components/divider"
 import OptionSelect from "@modules/products/components/product-actions/option-select"
 import { isEqual } from "lodash"
@@ -162,7 +162,8 @@ export default function ProductActions({
 
         <ProductPrice product={product} variant={selectedVariant} />
 
-        <Button
+        <ArcButton
+          type="button"
           onClick={handleAddToCart}
           disabled={
             !inStock ||
@@ -172,16 +173,17 @@ export default function ProductActions({
             !isValidVariant
           }
           variant="primary"
-          className="w-full h-10"
+          size="lg"
+          className="w-full"
           isLoading={isAdding}
           data-testid="add-product-button"
         >
           {!selectedVariant && !options
-            ? "Select variant"
+            ? "Choisir une variante"
             : !inStock || !isValidVariant
-            ? "Out of stock"
-            : "Add to cart"}
-        </Button>
+            ? "Rupture de stock"
+            : "Ajouter au panier"}
+        </ArcButton>
         <MobileActions
           product={product}
           variant={selectedVariant}
