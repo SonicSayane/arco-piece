@@ -1,4 +1,5 @@
 import { Container, clx } from "@medusajs/ui"
+import { ARC_BLUR_DATA_URL } from "@lib/util/image-blur"
 import Image from "next/image"
 import React from "react"
 
@@ -58,6 +59,8 @@ const ImageOrPlaceholder = ({
       draggable={false}
       quality={50}
       sizes="(max-width: 576px) 280px, (max-width: 768px) 360px, (max-width: 992px) 480px, 800px"
+      placeholder="blur"
+      blurDataURL={ARC_BLUR_DATA_URL}
       fill
     />
   ) : (

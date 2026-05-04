@@ -1,3 +1,4 @@
+import { ARC_BLUR_DATA_URL } from "@lib/util/image-blur"
 import { HttpTypes } from "@medusajs/types"
 import { Container } from "@medusajs/ui"
 import Image from "next/image"
@@ -25,6 +26,8 @@ const ImageGallery = ({ images }: ImageGalleryProps) => {
                   alt={`Product image ${index + 1}`}
                   fill
                   sizes="(max-width: 576px) 280px, (max-width: 768px) 360px, (max-width: 992px) 480px, 800px"
+                  placeholder="blur"
+                  blurDataURL={ARC_BLUR_DATA_URL}
                   style={{
                     objectFit: "cover",
                   }}
