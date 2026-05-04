@@ -3,8 +3,10 @@ import { Metadata } from "next"
 import FeaturedProducts from "@modules/home/components/featured-products"
 import Hero from "@modules/home/components/hero"
 import TrustBanner from "@modules/home/components/trust-banner"
+import VehicleFinder from "@modules/home/components/vehicle-finder"
 import { listCollections } from "@lib/data/collections"
 import { getRegion } from "@lib/data/regions"
+import { getVehicleOptions } from "@lib/data/vehicle-options"
 import { getDict } from "@lib/i18n"
 import { Heading, Text } from "@medusajs/ui"
 import ArcCard from "@modules/common/components/arc-card"
@@ -58,10 +60,11 @@ export default async function Home(props: {
 
   const { countryCode } = params
 
-  const [region, collectionsResp, dict] = await Promise.all([
+  const [region, collectionsResp, dict, vehicleOptions] = await Promise.all([
     getRegion(countryCode),
     listCollections({ fields: "id, handle, title" }),
     getDict(),
+    getVehicleOptions({ countryCode }),
   ])
 
   const { collections } = collectionsResp
@@ -73,6 +76,8 @@ export default async function Home(props: {
   return (
     <>
       <Hero />
+
+      <VehicleFinder options={vehicleOptions} />
 
       <TrustBanner copy={dict.trust} />
 
