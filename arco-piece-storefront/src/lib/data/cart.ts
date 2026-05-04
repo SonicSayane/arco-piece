@@ -157,6 +157,44 @@ export async function addToCart({
     .catch(medusaError)
 }
 
+export type ReorderResult = {
+  added: number
+  skipped: number
+}
+
+export async function reorderFromOrder({
+  order,
+  countryCode,
+}: {
+  order: HttpTypes.StoreOrder
+  countryCode: string
+}): Promise<ReorderResult> {
+  const items = order.items ?? []
+
+  let added = 0
+  let skipped = 0
+
+  for (const item of items) {
+    if (!item.variant_id) {
+      skipped += 1
+      continue
+    }
+
+    try {
+      await addToCart({
+        variantId: item.variant_id,
+        quantity: item.quantity ?? 1,
+        countryCode,
+      })
+      added += 1
+    } catch {
+      skipped += 1
+    }
+  }
+
+  return { added, skipped }
+}
+
 export async function updateLineItem({
   lineId,
   quantity,
