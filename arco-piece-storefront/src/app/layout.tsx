@@ -1,4 +1,5 @@
 import { getBaseURL } from "@lib/util/env"
+import { Toaster } from "@medusajs/ui"
 import { Metadata } from "next"
 import { Manrope, Space_Grotesk } from "next/font/google"
 import "../styles/globals.css"
@@ -68,6 +69,7 @@ export default function RootLayout(props: { children: React.ReactNode }) {
     >
       <body className="font-body text-arc-ink bg-arc-background antialiased">
         <main className="relative">{props.children}</main>
+        <Toaster position="top-right" duration={4000} />
       </body>
     </html>
   )
