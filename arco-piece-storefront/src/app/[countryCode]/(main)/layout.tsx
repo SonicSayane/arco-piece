@@ -4,6 +4,7 @@ import { listCartOptions, retrieveCart } from "@lib/data/cart"
 import { retrieveCustomer } from "@lib/data/customer"
 import { getBaseURL } from "@lib/util/env"
 import { StoreCartShippingOption } from "@medusajs/types"
+import BottomNav from "@modules/layout/components/bottom-nav"
 import CartMismatchBanner from "@modules/layout/components/cart-mismatch-banner"
 import WhatsappCta from "@modules/layout/components/whatsapp-cta"
 import Footer from "@modules/layout/templates/footer"
@@ -39,9 +40,10 @@ export default async function PageLayout(props: { children: React.ReactNode }) {
           shippingOptions={shippingOptions}
         />
       )}
-      {props.children}
+      <div className="pb-16 small:pb-0">{props.children}</div>
       <WhatsappCta />
       <Footer />
+      <BottomNav />
     </>
   )
 }

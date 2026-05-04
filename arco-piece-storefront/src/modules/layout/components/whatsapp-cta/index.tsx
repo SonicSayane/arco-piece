@@ -38,7 +38,7 @@ const WhatsappCta = ({
       rel="noopener noreferrer"
       aria-label="Contacter Arco-Piece sur WhatsApp"
       className={clx(
-        "fixed bottom-5 right-5 z-40 inline-flex h-14 w-14 items-center justify-center rounded-full shadow-lg transition-all duration-200",
+        "fixed bottom-20 small:bottom-5 right-5 z-40 inline-flex h-14 w-14 items-center justify-center rounded-full shadow-lg transition-all duration-200",
         "bg-[#25D366] hover:scale-105 hover:shadow-xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#25D366] focus-visible:ring-offset-2",
         mounted ? "opacity-100" : "opacity-0"
       )}
