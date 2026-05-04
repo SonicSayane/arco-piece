@@ -7,6 +7,7 @@ import CartTotals from "@modules/common/components/cart-totals"
 import Divider from "@modules/common/components/divider"
 import DiscountCode from "@modules/checkout/components/discount-code"
 import LocalizedClientLink from "@modules/common/components/localized-client-link"
+import PaymentBadges from "@modules/common/components/payment-badges"
 import { HttpTypes } from "@medusajs/types"
 
 type SummaryProps = {
@@ -47,6 +48,7 @@ const Summary = ({ cart }: SummaryProps) => {
           Passer la commande
         </ArcButton>
       </LocalizedClientLink>
+      <PaymentBadges className="mt-2" />
     </div>
   )
 }
