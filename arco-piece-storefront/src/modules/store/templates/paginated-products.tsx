@@ -14,6 +14,7 @@ type PaginatedProductsParams = {
   category_id?: string[]
   id?: string[]
   order?: string
+  q?: string
 }
 
 export default async function PaginatedProducts({
@@ -24,6 +25,7 @@ export default async function PaginatedProducts({
   vehicleBrand,
   model,
   year,
+  query,
   productsIds,
   countryCode,
 }: {
@@ -34,11 +36,16 @@ export default async function PaginatedProducts({
   vehicleBrand?: string
   model?: string
   year?: string
+  query?: string
   productsIds?: string[]
   countryCode: string
 }) {
   const queryParams: PaginatedProductsParams = {
     limit: FILTER_FETCH_PAGE_SIZE,
+  }
+
+  if (query) {
+    queryParams["q"] = query
   }
 
   if (collectionId) {

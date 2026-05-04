@@ -7,6 +7,7 @@ import { getLocale } from "@lib/data/locale-actions"
 import { StoreRegion } from "@medusajs/types"
 import LocalizedClientLink from "@modules/common/components/localized-client-link"
 import CartButton from "@modules/layout/components/cart-button"
+import SearchBar from "@modules/layout/components/search-bar"
 import SideMenu from "@modules/layout/components/side-menu"
 import Image from "next/image"
 
@@ -62,6 +63,10 @@ export default async function Nav() {
                 Arco-Piece
               </span>
             </LocalizedClientLink>
+          </div>
+
+          <div className="hidden small:flex flex-1 max-w-md mx-6">
+            <SearchBar />
           </div>
 
           <div className="flex items-center gap-x-4 small:gap-x-5 h-full flex-1 basis-0 justify-end">

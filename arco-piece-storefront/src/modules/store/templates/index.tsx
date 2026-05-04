@@ -15,6 +15,7 @@ const StoreTemplate = async ({
   vehicleBrand,
   model,
   year,
+  query,
   countryCode,
 }: {
   sortBy?: SortOptions
@@ -23,6 +24,7 @@ const StoreTemplate = async ({
   vehicleBrand?: string
   model?: string
   year?: string
+  query?: string
   countryCode: string
 }) => {
   const pageNumber = page ? parseInt(page) : 1
@@ -109,7 +111,7 @@ const StoreTemplate = async ({
                 className="font-display mt-2 text-3xl small:text-4xl text-arc-ink"
                 data-testid="store-page-title"
               >
-                Toutes les pieces
+                {query ? `Résultats pour « ${query} »` : "Toutes les pieces"}
               </h1>
             </div>
             <p className="font-body text-sm text-arc-muted">
@@ -125,6 +127,7 @@ const StoreTemplate = async ({
               vehicleBrand={vehicleBrand}
               model={model}
               year={year}
+              query={query}
               countryCode={countryCode}
             />
           </Suspense>
