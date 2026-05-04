@@ -267,6 +267,83 @@ export async function signup(
   redirect(accountPath)
 }
 
+export async function updateCustomerPassword(
+  _currentState: AuthActionState,
+  formData: FormData
+): Promise<AuthActionState> {
+  const oldPassword = (formData.get("old_password") as string)?.trim() ?? ""
+  const newPassword = (formData.get("new_password") as string) ?? ""
+  const confirmPassword = (formData.get("confirm_password") as string) ?? ""
+  const email = ((formData.get("email") as string) ?? "").trim().toLowerCase()
+
+  const errors: FieldErrors = {}
+
+  if (!email) {
+    errors.email = "Email manquant."
+  }
+
+  if (!oldPassword) {
+    errors.old_password = "Mot de passe actuel requis."
+  }
+
+  if (!newPassword) {
+    errors.new_password = "Nouveau mot de passe requis."
+  } else if (newPassword.length < 8) {
+    errors.new_password =
+      "Le mot de passe doit contenir au moins 8 caractères."
+  }
+
+  if (newPassword !== confirmPassword) {
+    errors.confirm_password = "Les mots de passe ne correspondent pas."
+  }
+
+  if (Object.keys(errors).length > 0) {
+    return fail("Veuillez corriger les champs indiqués.", errors)
+  }
+
+  const authSdk = createSdk()
+
+  try {
+    const loginResult = await authSdk.auth.login("customer", "emailpass", {
+      email,
+      password: oldPassword,
+    })
+
+    const freshToken = getTokenFromAuthResult(loginResult)
+
+    if (!freshToken) {
+      return fail("Authentification supplémentaire requise.")
+    }
+
+    await authSdk.auth.updateProvider(
+      "customer",
+      "emailpass",
+      { password: newPassword },
+      freshToken
+    )
+
+    await setAuthToken(freshToken)
+  } catch (error) {
+    if (isNextRedirectError(error)) {
+      throw error
+    }
+
+    logServerError("updateCustomerPassword", error)
+
+    const status = getErrorStatus(error)
+
+    if (status === 401) {
+      return fail("Mot de passe actuel invalide.", {
+        old_password: "Mot de passe actuel invalide.",
+      })
+    }
+
+    return fail(GENERIC_ERROR_MESSAGE)
+  }
+
+  return { message: null }
+}
+
 export async function login(
   _currentState: AuthActionState,
   formData: FormData

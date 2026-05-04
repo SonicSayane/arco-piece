@@ -1,41 +1,57 @@
 "use client"
 
-import React, { useEffect, useActionState } from "react";
+import React, { useEffect, useActionState } from "react"
 
 import Input from "@modules/common/components/input"
 
 import AccountInfo from "../account-info"
 import { HttpTypes } from "@medusajs/types"
-// import { updateCustomer } from "@lib/data/customer"
+import { updateCustomer } from "@lib/data/customer"
 
 type MyInformationProps = {
   customer: HttpTypes.StoreCustomer
 }
 
+type EmailState = {
+  success: boolean
+  error: string | null
+}
+
+const initialState: EmailState = {
+  success: false,
+  error: null,
+}
+
 const ProfileEmail: React.FC<MyInformationProps> = ({ customer }) => {
   const [successState, setSuccessState] = React.useState(false)
 
-  // TODO: It seems we don't support updating emails now?
-  const updateCustomerEmail = (
-    _currentState: Record<string, unknown>,
+  const updateCustomerEmail = async (
+    _currentState: EmailState,
     formData: FormData
-  ) => {
-    const customer = {
-      email: formData.get("email") as string,
+  ): Promise<EmailState> => {
+    const email = (formData.get("email") as string)?.trim().toLowerCase()
+
+    if (!email) {
+      return { success: false, error: "Email requis." }
+    }
+
+    if (email === customer.email) {
+      return { success: true, error: null }
     }
 
     try {
-      // await updateCustomer(customer)
+      await updateCustomer({ email } as HttpTypes.StoreUpdateCustomer)
       return { success: true, error: null }
-    } catch (error: any) {
-      return { success: false, error: error.toString() }
+    } catch (error) {
+      const message =
+        error instanceof Error
+          ? error.message
+          : "Impossible de mettre à jour l'email."
+      return { success: false, error: message }
     }
   }
 
-  const [state, formAction] = useActionState(updateCustomerEmail, {
-    error: false,
-    success: false,
-  })
+  const [state, formAction] = useActionState(updateCustomerEmail, initialState)
 
   const clearState = () => {
     setSuccessState(false)
@@ -52,7 +68,7 @@ const ProfileEmail: React.FC<MyInformationProps> = ({ customer }) => {
         currentInfo={`${customer.email}`}
         isSuccess={successState}
         isError={!!state.error}
-        errorMessage={state.error}
+        errorMessage={state.error ?? undefined}
         clearState={clearState}
         data-testid="account-email-editor"
       >
