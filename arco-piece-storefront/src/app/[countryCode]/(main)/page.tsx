@@ -11,6 +11,7 @@ import { getDict } from "@lib/i18n"
 import { Heading, Text } from "@medusajs/ui"
 import ArcCard from "@modules/common/components/arc-card"
 import LocalizedClientLink from "@modules/common/components/localized-client-link"
+import Reveal from "@modules/common/components/reveal"
 
 const PROMO_CARDS = [
   {
@@ -81,32 +82,41 @@ export default async function Home(props: {
 
       <TrustBanner copy={dict.trust} />
 
-      <section id="promos" className="content-container pb-10 small:pb-12">
-        <div className="grid grid-cols-1 medium:grid-cols-3 gap-4">
-          {PROMO_CARDS.map((card) => (
-            <ArcCard
+      <Reveal as="section" className="content-container pb-10 small:pb-12">
+        <div id="promos" className="grid grid-cols-1 medium:grid-cols-3 gap-4">
+          {PROMO_CARDS.map((card, index) => (
+            <Reveal
               key={card.title}
-              eyebrow={card.eyebrow}
-              title={card.title}
-              description={card.description}
-              accent={card.accent}
-              accentPosition={card.accentPosition}
-              animationDelayClass={card.delay}
-              footer={
-                <LocalizedClientLink
-                  href={card.href}
-                  className="inline-flex rounded-full border border-arc-divider bg-arc-surface-strong px-4 py-2 text-xs font-semibold text-arc-ink hover:bg-arc-surface transition"
-                >
-                  {card.cta}
-                </LocalizedClientLink>
+              delayClass={
+                index === 1
+                  ? "delay-150"
+                  : index === 2
+                    ? "delay-300"
+                    : undefined
               }
-            />
+            >
+              <ArcCard
+                eyebrow={card.eyebrow}
+                title={card.title}
+                description={card.description}
+                accent={card.accent}
+                accentPosition={card.accentPosition}
+                footer={
+                  <LocalizedClientLink
+                    href={card.href}
+                    className="inline-flex rounded-full border border-arc-divider bg-arc-surface-strong px-4 py-2 text-xs font-semibold text-arc-ink hover:bg-arc-surface transition"
+                  >
+                    {card.cta}
+                  </LocalizedClientLink>
+                }
+              />
+            </Reveal>
           ))}
         </div>
-      </section>
+      </Reveal>
 
       <section className="pb-14 small:pb-20">
-        <div className="content-container mt-2 mb-6 small:mb-8">
+        <Reveal className="content-container mt-2 mb-6 small:mb-8">
           <Text className="font-body text-xs uppercase tracking-[0.18em] text-[var(--arc-accent)]">
             Catalogue
           </Text>
@@ -116,7 +126,7 @@ export default async function Home(props: {
           >
             Collections en vedette
           </Heading>
-        </div>
+        </Reveal>
 
         <ul className="flex flex-col gap-y-2 small:gap-y-4">
           <FeaturedProducts collections={collections} region={region} />
