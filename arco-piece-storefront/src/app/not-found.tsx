@@ -1,30 +1,32 @@
-import { ArrowUpRightMini } from "@medusajs/icons"
-import { Text } from "@medusajs/ui"
 import { Metadata } from "next"
 import Link from "next/link"
 
+import ArcButton from "@modules/common/components/arc-button"
+import EmptyState from "@modules/common/components/empty-state"
+
 export const metadata: Metadata = {
-  title: "404",
-  description: "Something went wrong",
+  title: "Page introuvable",
+  description: "La page que vous cherchez n'existe pas ou a été déplacée.",
 }
 
 export default function NotFound() {
   return (
-    <div className="flex flex-col gap-4 items-center justify-center min-h-[calc(100vh-64px)]">
-      <h1 className="text-2xl-semi text-ui-fg-base">Page not found</h1>
-      <p className="text-small-regular text-ui-fg-base">
-        The page you tried to access does not exist.
-      </p>
-      <Link
-        className="flex gap-x-1 items-center group"
-        href="/"
-      >
-        <Text className="text-ui-fg-interactive">Go to frontpage</Text>
-        <ArrowUpRightMini
-          className="group-hover:rotate-45 ease-in-out duration-150"
-          color="var(--fg-interactive)"
-        />
-      </Link>
+    <div className="flex min-h-[calc(100vh-64px)] items-center justify-center bg-arc-surface">
+      <EmptyState
+        size="lg"
+        icon={
+          <span className="font-display text-3xl font-bold tracking-[-0.02em]">
+            404
+          </span>
+        }
+        title="Cette page roule en panne"
+        description="La page que vous cherchez n'existe pas ou a été déplacée."
+        action={
+          <Link href="/">
+            <ArcButton variant="primary">Retour à l'accueil</ArcButton>
+          </Link>
+        }
+      />
     </div>
   )
 }
