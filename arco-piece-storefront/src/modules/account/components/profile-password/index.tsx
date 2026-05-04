@@ -48,7 +48,7 @@ const ProfilePassword: React.FC<MyInformationProps> = ({ customer }) => {
       <AccountInfo
         label="Mot de passe"
         currentInfo={
-          <span>Le mot de passe n'est pas affiché pour des raisons de sécurité</span>
+          <span>Le mot de passe n&apos;est pas affiché pour des raisons de sécurité</span>
         }
         isSuccess={successState}
         isError={Boolean(state?.message)}

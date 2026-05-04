@@ -20,10 +20,10 @@ export default function NotFound() {
           </span>
         }
         title="Cette page roule en panne"
-        description="La page que vous cherchez n'existe pas ou a été déplacée. Reprenez la route depuis l'accueil ou explorez le catalogue."
+        description="La page que vous cherchez n&apos;existe pas ou a été déplacée. Reprenez la route depuis l&apos;accueil ou explorez le catalogue."
         action={
           <LocalizedClientLink href="/">
-            <ArcButton variant="primary">Retour à l'accueil</ArcButton>
+            <ArcButton variant="primary">Retour à l&apos;accueil</ArcButton>
           </LocalizedClientLink>
         }
         secondaryAction={

@@ -20,10 +20,10 @@ export default function NotFound() {
           </span>
         }
         title="Cette page roule en panne"
-        description="La page que vous cherchez n'existe pas ou a été déplacée."
+        description="La page que vous cherchez n&apos;existe pas ou a été déplacée."
         action={
           <Link href="/">
-            <ArcButton variant="primary">Retour à l'accueil</ArcButton>
+            <ArcButton variant="primary">Retour à l&apos;accueil</ArcButton>
           </Link>
         }
       />
