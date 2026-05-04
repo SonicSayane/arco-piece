@@ -3,6 +3,8 @@ import { notFound } from "next/navigation"
 import { listAllProducts, listProducts } from "@lib/data/products"
 import { getRegion, listRegions } from "@lib/data/regions"
 import ProductJsonLd from "@modules/products/components/product-jsonld"
+import RecentlyViewed from "@modules/products/components/recently-viewed"
+import RecentlyViewedTracker from "@modules/products/components/recently-viewed-tracker"
 import ProductTemplate from "@modules/products/templates"
 import { HttpTypes } from "@medusajs/types"
 import { getBaseURL } from "@lib/util/env"
@@ -177,11 +179,17 @@ export default async function ProductPage(props: Props) {
   return (
     <>
       <ProductJsonLd product={pricedProduct} url={productUrl} />
+      <RecentlyViewedTracker handle={params.handle} />
       <ProductTemplate
         product={pricedProduct}
         region={region}
         countryCode={params.countryCode}
         images={images}
+      />
+      <RecentlyViewed
+        countryCode={params.countryCode}
+        excludeHandles={[params.handle]}
+        region={region}
       />
     </>
   )
