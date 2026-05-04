@@ -428,14 +428,17 @@ export async function transferCart(authHeadersOverride?: {
 export type AddressActionState = {
   success: boolean
   error: string | null
+  isDefaultBilling?: boolean
+  isDefaultShipping?: boolean
+  addressId?: string
 }
 
 export const addCustomerAddress = async (
-  currentState: Record<string, unknown>,
+  currentState: AddressActionState,
   formData: FormData
 ): Promise<AddressActionState> => {
-  const isDefaultBilling = (currentState.isDefaultBilling as boolean) || false
-  const isDefaultShipping = (currentState.isDefaultShipping as boolean) || false
+  const isDefaultBilling = currentState.isDefaultBilling ?? false
+  const isDefaultShipping = currentState.isDefaultShipping ?? false
 
   const address = {
     first_name: (formData.get("first_name") as string) ?? "",
@@ -494,11 +497,11 @@ export const deleteCustomerAddress = async (
 }
 
 export const updateCustomerAddress = async (
-  currentState: Record<string, unknown>,
+  currentState: AddressActionState,
   formData: FormData
 ): Promise<AddressActionState> => {
   const addressId =
-    (currentState.addressId as string) || (formData.get("addressId") as string)
+    currentState.addressId || (formData.get("addressId") as string)
 
   if (!addressId) {
     return { success: false, error: "Address ID is required" }

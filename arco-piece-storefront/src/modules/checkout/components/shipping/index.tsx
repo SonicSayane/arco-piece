@@ -21,6 +21,15 @@ type ShippingProps = {
   availableShippingMethods: HttpTypes.StoreCartShippingOption[] | null
 }
 
+type ShippingMethodWithFulfillment = HttpTypes.StoreCartShippingOption & {
+  service_zone?: {
+    fulfillment_set?: {
+      type?: string
+      location?: { address?: HttpTypes.StoreCartAddress }
+    }
+  }
+}
+
 function formatAddress(address: HttpTypes.StoreCartAddress) {
   if (!address) {
     return ""
@@ -73,10 +82,14 @@ const Shipping: React.FC<ShippingProps> = ({
   const { shippingMethods, pickupMethods } = useMemo(
     () => ({
       shippingMethods: availableShippingMethods?.filter(
-        (sm) => sm.service_zone?.fulfillment_set?.type !== "pickup"
+        (sm) =>
+          (sm as ShippingMethodWithFulfillment).service_zone?.fulfillment_set
+            ?.type !== "pickup"
       ),
       pickupMethods: availableShippingMethods?.filter(
-        (sm) => sm.service_zone?.fulfillment_set?.type === "pickup"
+        (sm) =>
+          (sm as ShippingMethodWithFulfillment).service_zone?.fulfillment_set
+            ?.type === "pickup"
       ),
     }),
     [availableShippingMethods]
@@ -346,8 +359,9 @@ const Shipping: React.FC<ShippingProps> = ({
                               </span>
                               <span className="text-base-regular text-ui-fg-muted">
                                 {formatAddress(
-                                  option.service_zone?.fulfillment_set?.location
-                                    ?.address
+                                  (option as ShippingMethodWithFulfillment)
+                                    .service_zone?.fulfillment_set?.location
+                                    ?.address as HttpTypes.StoreCartAddress
                                 )}
                               </span>
                             </div>

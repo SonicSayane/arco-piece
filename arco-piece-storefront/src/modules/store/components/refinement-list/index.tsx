@@ -17,10 +17,10 @@ type RefinementListProps = {
   vehicleBrand?: string
   model?: string
   year?: string
-  categoryOptions: FilterOption[]
-  vehicleBrandOptions: FilterOption[]
-  modelOptions: FilterOption[]
-  yearOptions: FilterOption[]
+  categoryOptions?: FilterOption[]
+  vehicleBrandOptions?: FilterOption[]
+  modelOptions?: FilterOption[]
+  yearOptions?: FilterOption[]
   search?: boolean
   'data-testid'?: string
 }
@@ -31,10 +31,10 @@ const RefinementList = ({
   vehicleBrand,
   model,
   year,
-  categoryOptions,
-  vehicleBrandOptions,
-  modelOptions,
-  yearOptions,
+  categoryOptions = [],
+  vehicleBrandOptions = [],
+  modelOptions = [],
+  yearOptions = [],
   'data-testid': dataTestId,
 }: RefinementListProps) => {
   const router = useRouter()

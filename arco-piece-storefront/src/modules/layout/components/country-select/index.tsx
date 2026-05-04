@@ -62,41 +62,45 @@ const CountrySelect = ({ toggleState, regions }: CountrySelectProps) => {
 
   const { state, close } = toggleState
 
-  const options = useMemo(() => {
-    return regions
-      ?.map((r) => {
-        return r.countries?.map((c) => ({
-          country: c.iso_2,
-          region: r.id,
-          label: c.display_name,
-          currencyCode: r.currency_code ?? "",
-        }))
-      })
-      .flat()
+  const options = useMemo<CountryOption[]>(() => {
+    return (regions ?? [])
+      .flatMap<CountryOption>((r) =>
+        (r.countries ?? [])
+          .filter(
+            (c): c is typeof c & { iso_2: string; display_name: string } =>
+              Boolean(c.iso_2 && c.display_name)
+          )
+          .map((c) => ({
+            country: c.iso_2,
+            region: r.id,
+            label: c.display_name,
+            currencyCode: r.currency_code ?? "",
+          }))
+      )
       .sort((a, b) => {
         const countryPriorityDelta =
-          getCountryPriority(a?.country) - getCountryPriority(b?.country)
+          getCountryPriority(a.country) - getCountryPriority(b.country)
 
         if (countryPriorityDelta !== 0) {
           return countryPriorityDelta
         }
 
         const currencyPriorityDelta =
-          getCurrencyPriority(a?.currencyCode) -
-          getCurrencyPriority(b?.currencyCode)
+          getCurrencyPriority(a.currencyCode) -
+          getCurrencyPriority(b.currencyCode)
 
         if (currencyPriorityDelta !== 0) {
           return currencyPriorityDelta
         }
 
-        return (a?.label ?? "").localeCompare(b?.label ?? "")
+        return a.label.localeCompare(b.label)
       })
   }, [regions])
 
   useEffect(() => {
     if (countryCode) {
-      const option = options?.find(
-        (o) => o?.country?.toLowerCase() === countryCode.toLowerCase()
+      const option = options.find(
+        (o) => o.country.toLowerCase() === countryCode.toLowerCase()
       )
       setCurrent(option)
     }
@@ -114,8 +118,8 @@ const CountrySelect = ({ toggleState, regions }: CountrySelectProps) => {
         onChange={handleChange}
         defaultValue={
           countryCode
-            ? options?.find(
-                (o) => o?.country?.toLowerCase() === countryCode.toLowerCase()
+            ? options.find(
+                (o) => o.country.toLowerCase() === countryCode.toLowerCase()
               )
             : undefined
         }
@@ -152,14 +156,14 @@ const CountrySelect = ({ toggleState, regions }: CountrySelectProps) => {
               className="absolute -bottom-[calc(100%-36px)] left-0 xsmall:left-auto xsmall:right-0 max-h-[442px] overflow-y-scroll z-[900] bg-white drop-shadow-md text-small-regular uppercase text-black no-scrollbar rounded-rounded w-full"
               static
             >
-              {options?.map((o, index) => {
+              {options.map((o, index) => {
                 return (
                   <ListboxOption
                     key={index}
                     value={o}
                     className="py-2 hover:bg-gray-200 px-3 cursor-pointer flex items-center gap-x-2"
                   >
-                    {isIsoCountryCode(o?.country) ? (
+                    {isIsoCountryCode(o.country) ? (
                       <ReactCountryFlag
                         svg
                         style={{
@@ -171,7 +175,7 @@ const CountrySelect = ({ toggleState, regions }: CountrySelectProps) => {
                     ) : (
                       <span style={{ width: "16px", height: "16px" }} />
                     )}{" "}
-                    {o?.label}
+                    {o.label}
                   </ListboxOption>
                 )
               })}
