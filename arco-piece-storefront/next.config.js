@@ -11,11 +11,13 @@ const S3_PATHNAME = process.env.MEDUSA_CLOUD_S3_PATHNAME
 /**
  * @type {import('next').NextConfig}
  */
+const isProduction = process.env.NODE_ENV === "production"
+
 const nextConfig = {
   reactStrictMode: true,
   logging: {
     fetches: {
-      fullUrl: true,
+      fullUrl: !isProduction,
     },
   },
   eslint: {

@@ -4,7 +4,6 @@ import { retrieveCustomer } from "@lib/data/customer"
 import { listRegions } from "@lib/data/regions"
 import { listLocales } from "@lib/data/locales"
 import { getLocale } from "@lib/data/locale-actions"
-import { getCustomerName } from "@lib/data/cookies"
 import { StoreRegion } from "@medusajs/types"
 import LocalizedClientLink from "@modules/common/components/localized-client-link"
 import CartButton from "@modules/layout/components/cart-button"
@@ -12,26 +11,24 @@ import SideMenu from "@modules/layout/components/side-menu"
 import Image from "next/image"
 
 export default async function Nav() {
-  const [regions, locales, currentLocale, customer, savedCustomerName] =
-    await Promise.all([
+  const [regions, locales, currentLocale, customer] = await Promise.all([
     listRegions().then((regions: StoreRegion[]) => regions),
     listLocales(),
     getLocale(),
     retrieveCustomer().catch(() => null),
-    getCustomerName().catch(() => undefined),
   ])
 
-  const accountDisplayName =
-    `${customer?.first_name ?? ""} ${customer?.last_name ?? ""}`.trim() ||
-    customer?.email?.split("@")[0] ||
-    savedCustomerName ||
-    "Compte"
+  const accountDisplayName = customer
+    ? `${customer.first_name ?? ""} ${customer.last_name ?? ""}`.trim() ||
+      customer.email?.split("@")[0] ||
+      "Compte"
+    : "Se connecter"
 
-  const userInitials = `${customer?.first_name?.[0] ?? ""}${
-    customer?.last_name?.[0] ?? ""
-  }`
-    .trim()
-    .toUpperCase() || accountDisplayName[0]?.toUpperCase() || "C"
+  const userInitials = customer
+    ? `${customer.first_name?.[0] ?? ""}${customer.last_name?.[0] ?? ""}`
+        .trim()
+        .toUpperCase() || accountDisplayName[0]?.toUpperCase() || "C"
+    : ""
 
   return (
     <div className="sticky top-0 inset-x-0 z-50">
@@ -68,19 +65,30 @@ export default async function Nav() {
           </div>
 
           <div className="flex items-center gap-x-4 small:gap-x-5 h-full flex-1 basis-0 justify-end">
-            <LocalizedClientLink
-              className="hidden small:inline-flex items-center gap-x-2 rounded-full border border-arc-divider bg-arc-surface px-2.5 py-1.5 hover:bg-arc-surface-strong transition-colors"
-              href="/account"
-              data-testid="nav-account-link"
-              title={accountDisplayName}
-            >
-              <span className="inline-flex h-6 w-6 items-center justify-center rounded-full bg-[var(--arc-accent)] text-white text-[10px] font-bold">
-                {userInitials}
-              </span>
-              <span className="max-w-[9.5rem] truncate text-xs font-semibold tracking-[0.04em] text-arc-ink">
+            {customer ? (
+              <LocalizedClientLink
+                className="hidden small:inline-flex items-center gap-x-2 rounded-full border border-arc-divider bg-arc-surface px-2.5 py-1.5 hover:bg-arc-surface-strong transition-colors"
+                href="/account"
+                data-testid="nav-account-link"
+                title={accountDisplayName}
+              >
+                <span className="inline-flex h-6 w-6 items-center justify-center rounded-full bg-[var(--arc-accent)] text-white text-[10px] font-bold">
+                  {userInitials}
+                </span>
+                <span className="max-w-[9.5rem] truncate text-xs font-semibold tracking-[0.04em] text-arc-ink">
+                  {accountDisplayName}
+                </span>
+              </LocalizedClientLink>
+            ) : (
+              <LocalizedClientLink
+                className="hidden small:inline-flex items-center rounded-full border border-arc-divider bg-arc-surface px-3 py-1.5 text-xs font-semibold tracking-[0.04em] text-arc-ink hover:bg-arc-surface-strong transition-colors"
+                href="/account"
+                data-testid="nav-account-link"
+                title={accountDisplayName}
+              >
                 {accountDisplayName}
-              </span>
-            </LocalizedClientLink>
+              </LocalizedClientLink>
+            )}
             <Suspense
               fallback={
                 <LocalizedClientLink

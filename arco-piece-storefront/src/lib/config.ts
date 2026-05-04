@@ -14,27 +14,49 @@ export const sdk = new Medusa({
   publishableKey: process.env.NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY,
 })
 
-const originalFetch = sdk.client.fetch.bind(sdk.client)
+const patchSdkFetch = (clientSdk: Medusa) => {
+  const originalFetch = clientSdk.client.fetch.bind(clientSdk.client)
 
-sdk.client.fetch = async <T>(
-  input: FetchInput,
-  init?: FetchArgs
-): Promise<T> => {
-  const headers = new Headers(init?.headers as HeadersInit | undefined)
+  clientSdk.client.fetch = async <T>(
+    input: FetchInput,
+    init?: FetchArgs
+  ): Promise<T> => {
+    const headers = new Headers(init?.headers as HeadersInit | undefined)
 
-  try {
-    const localeHeader = await getLocaleHeader()
-    const locale = localeHeader["x-medusa-locale"]
+    const publishableKey = process.env.NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY
 
-    if (locale && !headers.has("x-medusa-locale")) {
-      headers.set("x-medusa-locale", locale)
+    if (publishableKey && !headers.has("x-publishable-api-key")) {
+      headers.set("x-publishable-api-key", publishableKey)
     }
-  } catch {}
 
-  init = {
-    ...init,
-    headers,
+    try {
+      const localeHeader = await getLocaleHeader()
+      const locale = localeHeader["x-medusa-locale"]
+
+      if (locale && !headers.has("x-medusa-locale")) {
+        headers.set("x-medusa-locale", locale)
+      }
+    } catch {}
+
+    init = {
+      ...init,
+      headers: Object.fromEntries(headers.entries()),
+    }
+
+    return originalFetch(input, init)
   }
 
-  return originalFetch(input, init)
+  return clientSdk
 }
+
+export const createSdk = () => {
+  const clientSdk = new Medusa({
+    baseUrl: MEDUSA_BACKEND_URL,
+    debug: process.env.NODE_ENV === "development",
+    publishableKey: process.env.NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY,
+  })
+
+  return patchSdkFetch(clientSdk)
+}
+
+patchSdkFetch(sdk)

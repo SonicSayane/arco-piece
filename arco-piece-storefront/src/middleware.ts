@@ -152,6 +152,9 @@ export async function middleware(request: NextRequest) {
   if (urlHasCountryCode && !cacheIdCookie) {
     response.cookies.set("_medusa_cache_id", cacheId, {
       maxAge: 60 * 60 * 24,
+      httpOnly: true,
+      sameSite: "strict",
+      secure: process.env.NODE_ENV === "production",
     })
 
     return response

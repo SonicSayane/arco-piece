@@ -1,9 +1,12 @@
-import { login } from "@lib/data/customer"
+"use client"
+
+import { login, type AuthActionState } from "@lib/data/customer"
 import { LOGIN_VIEW } from "@modules/account/templates/login-template"
 import ErrorMessage from "@modules/checkout/components/error-message"
 import { SubmitButton } from "@modules/checkout/components/submit-button"
 import Input from "@modules/common/components/input"
 import Image from "next/image"
+import { useParams } from "next/navigation"
 import { useActionState } from "react"
 
 type Props = {
@@ -11,7 +14,13 @@ type Props = {
 }
 
 const Login = ({ setCurrentView }: Props) => {
-  const [message, formAction] = useActionState(login, null)
+  const [state, formAction] = useActionState<AuthActionState, FormData>(
+    login,
+    null
+  )
+  const params = useParams<{ countryCode?: string }>()
+  const countryCode =
+    typeof params?.countryCode === "string" ? params.countryCode : ""
 
   return (
     <div
@@ -35,43 +44,52 @@ const Login = ({ setCurrentView }: Props) => {
         Bienvenue sur Arco-Piece
       </h1>
       <p className="mt-2 text-center text-sm text-arc-muted mb-8">
-        Connectez-vous pour suivre vos commandes et accelerer vos achats.
+        Connectez-vous pour suivre vos commandes et accélérer vos achats.
       </p>
 
-      <form className="w-full" action={formAction}>
+      <form className="w-full" action={formAction} noValidate>
+        {countryCode && (
+          <input type="hidden" name="country_code" value={countryCode} />
+        )}
         <div className="flex flex-col w-full gap-y-2">
           <Input
             label="Email"
             name="email"
             type="email"
-            title="Enter a valid email address."
+            title="Saisissez une adresse email valide."
             autoComplete="email"
             required
+            fieldError={state?.errors?.email}
             data-testid="email-input"
           />
           <Input
-            label="Password"
+            label="Mot de passe"
             name="password"
             type="password"
             autoComplete="current-password"
             required
+            fieldError={state?.errors?.password}
             data-testid="password-input"
           />
         </div>
-        <ErrorMessage error={message} data-testid="login-error-message" />
+        <ErrorMessage
+          error={state?.message ?? null}
+          data-testid="login-error-message"
+        />
         <SubmitButton data-testid="sign-in-button" className="w-full mt-6 h-11">
           Se connecter
         </SubmitButton>
       </form>
 
-      <span className="text-center text-arc-muted text-small-regular mt-6">
+      <span className="text-center text-arc-muted text-small-regular mt-6 block">
         Pas encore de compte ?{" "}
         <button
+          type="button"
           onClick={() => setCurrentView(LOGIN_VIEW.REGISTER)}
           className="underline text-arc-ink"
           data-testid="register-button"
         >
-          Creer un compte
+          Créer un compte
         </button>
         .
       </span>
