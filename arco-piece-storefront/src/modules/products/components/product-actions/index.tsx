@@ -5,6 +5,7 @@ import { useIntersection } from "@lib/hooks/use-in-view"
 import { HttpTypes } from "@medusajs/types"
 import ArcButton from "@modules/common/components/arc-button"
 import Divider from "@modules/common/components/divider"
+import StockUrgency from "@modules/products/components/stock-urgency"
 import OptionSelect from "@modules/products/components/product-actions/option-select"
 import { isEqual } from "lodash"
 import { useParams, usePathname, useSearchParams } from "next/navigation"
@@ -161,6 +162,8 @@ export default function ProductActions({
         </div>
 
         <ProductPrice product={product} variant={selectedVariant} />
+
+        <StockUrgency variant={selectedVariant} />
 
         <ArcButton
           type="button"
