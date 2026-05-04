@@ -2,22 +2,35 @@
 
 import ArcButton from "@modules/common/components/arc-button"
 import type { VehicleOptions } from "@lib/data/vehicle-options"
+import type { SavedVehicle } from "@lib/data/vehicles"
 import { useParams, useRouter } from "next/navigation"
 import { useMemo, useState } from "react"
 
 type Props = {
   options: VehicleOptions
+  defaults?: SavedVehicle | null
 }
 
-const VehicleFinder = ({ options }: Props) => {
+const VehicleFinder = ({ options, defaults }: Props) => {
   const router = useRouter()
   const params = useParams<{ countryCode?: string }>()
   const countryCode =
     typeof params?.countryCode === "string" ? params.countryCode : ""
 
-  const [brand, setBrand] = useState("")
-  const [model, setModel] = useState("")
-  const [year, setYear] = useState("")
+  const [brand, setBrand] = useState(() =>
+    defaults && options.brands.includes(defaults.brand) ? defaults.brand : ""
+  )
+  const [model, setModel] = useState(() => {
+    if (!defaults?.brand || !defaults?.model) return ""
+    const list = options.modelsByBrand[defaults.brand] ?? []
+    return list.includes(defaults.model) ? defaults.model : ""
+  })
+  const [year, setYear] = useState(() => {
+    if (!defaults?.brand || !defaults?.model || !defaults?.year) return ""
+    const list =
+      options.yearsByBrandModel[`${defaults.brand}|${defaults.model}`] ?? []
+    return list.includes(defaults.year) ? defaults.year : ""
+  })
 
   const models = useMemo(
     () => (brand ? options.modelsByBrand[brand] ?? [] : []),

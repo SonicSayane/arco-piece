@@ -159,6 +159,15 @@ const AccountNav = ({
                   Liste de souhaits
                 </AccountNavLink>
               </li>
+              <li>
+                <AccountNavLink
+                  href="/account/vehicles"
+                  route={route!}
+                  data-testid="vehicles-link"
+                >
+                  Mes véhicules
+                </AccountNavLink>
+              </li>
               <li className="text-grey-700">
                 <button
                   type="button"
