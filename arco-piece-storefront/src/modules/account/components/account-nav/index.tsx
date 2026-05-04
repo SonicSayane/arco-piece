@@ -150,6 +150,15 @@ const AccountNav = ({
                   Orders
                 </AccountNavLink>
               </li>
+              <li>
+                <AccountNavLink
+                  href="/account/wishlist"
+                  route={route!}
+                  data-testid="wishlist-link"
+                >
+                  Liste de souhaits
+                </AccountNavLink>
+              </li>
               <li className="text-grey-700">
                 <button
                   type="button"

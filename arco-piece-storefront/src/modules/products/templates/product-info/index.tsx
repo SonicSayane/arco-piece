@@ -1,12 +1,15 @@
 import { HttpTypes } from "@medusajs/types"
 import { Heading, Text } from "@medusajs/ui"
+import { isInWishlist } from "@lib/data/wishlist"
 import LocalizedClientLink from "@modules/common/components/localized-client-link"
+import WishlistButton from "@modules/common/components/wishlist-button"
 
 type ProductInfoProps = {
   product: HttpTypes.StoreProduct
 }
 
-const ProductInfo = ({ product }: ProductInfoProps) => {
+const ProductInfo = async ({ product }: ProductInfoProps) => {
+  const wishlisted = await isInWishlist(product.handle ?? "")
   const metadata = (product.metadata ?? {}) as Record<string, unknown>
 
   const readMetadataValue = (keys: string[]): string | null => {
@@ -47,13 +50,21 @@ const ProductInfo = ({ product }: ProductInfoProps) => {
             {product.collection.title}
           </LocalizedClientLink>
         )}
-        <Heading
-          level="h2"
-          className="text-3xl leading-10 text-ui-fg-base"
-          data-testid="product-title"
-        >
-          {product.title}
-        </Heading>
+        <div className="flex items-start justify-between gap-3">
+          <Heading
+            level="h2"
+            className="text-3xl leading-10 text-ui-fg-base"
+            data-testid="product-title"
+          >
+            {product.title}
+          </Heading>
+          {product.handle && (
+            <WishlistButton
+              handle={product.handle}
+              initialInWishlist={wishlisted}
+            />
+          )}
+        </div>
 
         <Text
           className="text-medium text-ui-fg-subtle whitespace-pre-line"
