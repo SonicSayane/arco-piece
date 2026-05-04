@@ -130,18 +130,26 @@ export default async function Footer() {
                 <ul className="grid grid-cols-1 gap-y-2 text-arc-muted">
                   <li>
                     <LocalizedClientLink
-                      href="/"
+                      href="/about"
                       className="hover:text-[var(--arc-accent)] transition-colors"
                     >
-                      Accueil
+                      À propos
                     </LocalizedClientLink>
                   </li>
                   <li>
                     <LocalizedClientLink
-                      href="/store"
+                      href="/how-to-order"
                       className="hover:text-[var(--arc-accent)] transition-colors"
                     >
-                      Catalogue
+                      Comment commander
+                    </LocalizedClientLink>
+                  </li>
+                  <li>
+                    <LocalizedClientLink
+                      href="/faq"
+                      className="hover:text-[var(--arc-accent)] transition-colors"
+                    >
+                      FAQ
                     </LocalizedClientLink>
                   </li>
                   <li>
@@ -149,7 +157,7 @@ export default async function Footer() {
                       href="/account"
                       className="hover:text-[var(--arc-accent)] transition-colors"
                     >
-                      Profil
+                      Mon compte
                     </LocalizedClientLink>
                   </li>
                 </ul>
