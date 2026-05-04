@@ -2,6 +2,7 @@ import { Metadata } from "next"
 
 import FeaturedProducts from "@modules/home/components/featured-products"
 import Hero from "@modules/home/components/hero"
+import TrustBanner from "@modules/home/components/trust-banner"
 import { listCollections } from "@lib/data/collections"
 import { getRegion } from "@lib/data/regions"
 import { Heading, Text } from "@medusajs/ui"
@@ -69,6 +70,8 @@ export default async function Home(props: {
   return (
     <>
       <Hero />
+
+      <TrustBanner />
 
       <section id="promos" className="content-container pb-10 small:pb-12">
         <div className="grid grid-cols-1 medium:grid-cols-3 gap-4">
