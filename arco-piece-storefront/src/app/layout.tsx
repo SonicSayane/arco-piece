@@ -1,3 +1,4 @@
+import { getTheme } from "@lib/data/theme"
 import { getBaseURL } from "@lib/util/env"
 import { Toaster } from "@medusajs/ui"
 import { Metadata } from "next"
@@ -60,12 +61,15 @@ export const metadata: Metadata = {
   },
 }
 
-export default function RootLayout(props: { children: React.ReactNode }) {
+export default async function RootLayout(props: { children: React.ReactNode }) {
+  const theme = await getTheme()
   return (
     <html
       lang="fr"
-      data-mode="light"
-      className={`${bodyFont.variable} ${displayFont.variable}`}
+      data-mode={theme}
+      className={`${bodyFont.variable} ${displayFont.variable} ${
+        theme === "dark" ? "dark" : ""
+      }`}
     >
       <body className="font-body text-arc-ink bg-arc-background antialiased">
         <main className="relative">{props.children}</main>
