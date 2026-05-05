@@ -34,7 +34,7 @@ const Modal = ({
           leaveFrom="opacity-100"
           leaveTo="opacity-0"
         >
-          <div className="fixed inset-0 bg-opacity-75 backdrop-blur-md  h-screen" />
+          <div className="fixed inset-0 bg-black/50 backdrop-blur-md h-screen" />
         </Transition.Child>
 
         <div className="fixed inset-0 overflow-y-hidden">
@@ -59,13 +59,14 @@ const Modal = ({
               <Dialog.Panel
                 data-testid={dataTestId}
                 className={clx(
-                  "flex flex-col justify-start w-full transform p-5 text-left align-middle transition-all max-h-[75vh] h-fit",
+                  "flex flex-col justify-start w-full transform p-5 text-left align-middle transition-all max-h-[75vh] h-fit text-arc-ink",
                   {
                     "max-w-md": size === "small",
                     "max-w-xl": size === "medium",
                     "max-w-3xl": size === "large",
                     "bg-transparent shadow-none": search,
-                    "bg-white shadow-xl border rounded-rounded": !search,
+                    "bg-arc-surface border border-arc-divider rounded-2xl shadow-2xl":
+                      !search,
                   }
                 )}
               >
