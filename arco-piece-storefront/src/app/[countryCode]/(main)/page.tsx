@@ -2,6 +2,7 @@ import { Metadata } from "next"
 
 import FeaturedProducts from "@modules/home/components/featured-products"
 import Hero from "@modules/home/components/hero"
+import HowToOrderTeaser from "@modules/home/components/how-to-order-teaser"
 import TrustBanner from "@modules/home/components/trust-banner"
 import VehicleFinder from "@modules/home/components/vehicle-finder"
 import { listCollections } from "@lib/data/collections"
@@ -117,6 +118,8 @@ export default async function Home(props: {
           ))}
         </div>
       </Reveal>
+
+      <HowToOrderTeaser />
 
       <section className="pb-14 small:pb-20">
         <Reveal className="content-container mt-2 mb-6 small:mb-8">
