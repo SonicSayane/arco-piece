@@ -27,9 +27,21 @@ const DEFAULT_COPY: TrustCopy = {
   },
 }
 
+type AccentTone = "accent" | "trust" | "success"
+
 type TrustItem = {
   copyKey: keyof TrustCopy
   icon: React.ReactNode
+  tone: AccentTone
+}
+
+const TONE_CLASSES: Record<AccentTone, string> = {
+  accent:
+    "bg-[var(--arc-accent-soft)] text-[var(--arc-accent)]",
+  trust:
+    "bg-arc-trust-soft text-arc-trust",
+  success:
+    "bg-arc-success-soft text-arc-success",
 }
 
 const ICON_CLASS = "h-5 w-5"
@@ -44,6 +56,7 @@ const STROKE_PROPS = {
 const TRUST_ITEMS: TrustItem[] = [
   {
     copyKey: "payment",
+    tone: "trust",
     icon: (
       <svg viewBox="0 0 24 24" className={ICON_CLASS} {...STROKE_PROPS}>
         <rect x="3" y="6" width="18" height="13" rx="2" />
@@ -54,6 +67,7 @@ const TRUST_ITEMS: TrustItem[] = [
   },
   {
     copyKey: "shipping",
+    tone: "accent",
     icon: (
       <svg viewBox="0 0 24 24" className={ICON_CLASS} {...STROKE_PROPS}>
         <path d="M3 7h11v9H3z" />
@@ -65,6 +79,7 @@ const TRUST_ITEMS: TrustItem[] = [
   },
   {
     copyKey: "support",
+    tone: "success",
     icon: (
       <svg viewBox="0 0 24 24" className={ICON_CLASS} {...STROKE_PROPS}>
         <path d="M21 11.5a8.5 8.5 0 1 1-3.6-6.93" />
@@ -74,6 +89,7 @@ const TRUST_ITEMS: TrustItem[] = [
   },
   {
     copyKey: "compatibility",
+    tone: "accent",
     icon: (
       <svg viewBox="0 0 24 24" className={ICON_CLASS} {...STROKE_PROPS}>
         <circle cx="11" cy="11" r="6.5" />
@@ -107,7 +123,10 @@ const TrustBanner = ({
             >
               <span
                 aria-hidden="true"
-                className="mt-0.5 inline-flex h-9 w-9 flex-none items-center justify-center rounded-full bg-arc-surface-strong text-[var(--arc-accent)]"
+                className={
+                  "mt-0.5 inline-flex h-9 w-9 flex-none items-center justify-center rounded-full " +
+                  TONE_CLASSES[item.tone]
+                }
               >
                 {item.icon}
               </span>
