@@ -59,7 +59,7 @@ const Modal = ({
               <Dialog.Panel
                 data-testid={dataTestId}
                 className={clx(
-                  "flex flex-col justify-start w-full transform p-5 text-left align-middle transition-all max-h-[75vh] h-fit text-arc-ink",
+                  "flex flex-col justify-start w-full transform p-5 text-left align-middle transition-all max-h-[85vh] overflow-y-auto h-fit text-arc-ink",
                   {
                     "max-w-md": size === "small",
                     "max-w-xl": size === "medium",
@@ -104,7 +104,7 @@ const Description: React.FC<{ children: React.ReactNode }> = ({ children }) => {
 }
 
 const Body: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  return <div className="flex justify-center">{children}</div>
+  return <div className="w-full">{children}</div>
 }
 
 const Footer: React.FC<{ children: React.ReactNode }> = ({ children }) => {
